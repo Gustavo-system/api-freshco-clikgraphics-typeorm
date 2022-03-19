@@ -24,6 +24,8 @@ export class ProductsController{
                 description: req.body.description,
                 price: req.body.price,
                 discount: req.body.discount,
+                category: req.body.category,
+                branch: req.body.branch,
                 sizes: req.body.sizes,
                 maximumQuantity: req.body.maximumQuantity,
                 recommended: (req.body.recommended == true || req.body.recommended == 1 ) ? true : false,
@@ -31,9 +33,7 @@ export class ProductsController{
                 popular: (req.body.popular == true || req.body.popular == 1) ? true : false,
                 new: (req.body.new == true || req.body.new == 1) ? true : false,
                 vegan: (req.body.vegan == true || req.body.vegan == 1) ? true : false,
-                category: req.body.category,
-                branch: req.body.branch,
-                image: req.file.filename
+                // image: req.file.filename
             });
             await getRepository(ProductModel).save(model);
             return responseMessage(resp, 201, true, 'Created');
@@ -45,7 +45,7 @@ export class ProductsController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["products", "categories"]});
+            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {
@@ -62,6 +62,7 @@ export class ProductsController{
             model.name = req.body.name;
             model.description = req.body.description;
             model.category = req.body.category;
+            model.branch = req.body.branch;
             model.price = req.body.price;
             model.discount = req.body.discount;
             model.sizes = req.body.sizes;
@@ -71,7 +72,7 @@ export class ProductsController{
             model.popular = (req.body.popular == true || req.body.popular == 1) ? true : false;
             model.new = (req.body.new == true || req.body.new == 1) ? true : false;
             model.vegan = (req.body.vegan == true || req.body.vegan == 1) ? true : false;
-            model.image = req.file.filename
+            // model.image = req.file.filename
 
             await getRepository(ProductModel).save(model);
             return responseMessage(resp, 201, true, 'successful update');
