@@ -75,7 +75,8 @@ export class ProductsController{
             // model.image = req.file.filename
 
             await getRepository(ProductModel).save(model);
-            return responseMessage(resp, 201, true, 'successful update');
+            // return responseMessage(resp, 201, true, 'successful update');
+            return responseData(resp, 201, 'successful update', model);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
