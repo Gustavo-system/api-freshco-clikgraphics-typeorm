@@ -32,6 +32,7 @@ export class ProductsController{
                 new: (req.body.new == true || req.body.new == 1) ? true : false,
                 vegan: (req.body.vegan == true || req.body.vegan == 1) ? true : false,
                 category: req.body.category,
+                branch: req.body.branch,
                 image: req.file.filename
             });
             await getRepository(ProductModel).save(model);
