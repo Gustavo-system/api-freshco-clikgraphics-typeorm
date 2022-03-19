@@ -77,9 +77,9 @@ export class UserController{
             model.birthday = req.body.birthday,
             model.image = req.file.fieldname,
 
-            await getRepository(UserModel).save(model);
+            await getRepository(UserModel).update({id_user:model.id_user},model);
 
-            return responseMessage(resp, 200, true, 'successful update');
+            return responseMessage(resp, 200, true, 'successful update',model);
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');

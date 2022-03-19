@@ -112,7 +112,7 @@ export class OrderController{
                 model.verified_pin = req.body.pin;
             }
 
-            await getRepository(OrdersModel).save(model);
+            await getRepository(OrdersModel).update({id_branch:model.id_branch},model);
             return responseMessage(resp, 201, true, 'successful update');
         } catch (error) {
             console.log(error)

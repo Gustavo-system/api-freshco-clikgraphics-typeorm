@@ -56,9 +56,9 @@ export class ProductsController{
 
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
+    
             const model = await getRepository(ProductModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
-
             model.name = req.body.name;
             model.description = req.body.description;
             model.category = req.body.category;
@@ -72,10 +72,10 @@ export class ProductsController{
             model.popular = (req.body.popular == true || req.body.popular == 1) ? true : false;
             model.new = (req.body.new == true || req.body.new == 1) ? true : false;
             model.vegan = (req.body.vegan == true || req.body.vegan == 1) ? true : false;
-            // model.image = req.file.filename
+            model.image = req.file.filename
 
-            await getRepository(ProductModel).save(model);
-            return responseMessage(resp, 201, true, 'successful update');
+            await getRepository(ProductModel).update({id_product:model.id_product},model);
+            return responseMessage(resp, 201, true, 'successful update',model);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');

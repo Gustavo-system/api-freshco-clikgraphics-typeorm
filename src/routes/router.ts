@@ -49,7 +49,7 @@ router.delete('/branchs/:id', BranchController.delete);
 router.get('/products', ProductsController.get);
 router.post('/products', upload.single('image'), ProductsController.post);
 router.get('/products/:id', ProductsController.getID);
-router.put('/products/:id', ProductsController.update);
+router.put('/products/:id',upload.single('image'),ProductsController.update);
 router.delete('/products/:id', ProductsController.delete);
 
 router.get('/delivery_man', DeliveryManController.get);

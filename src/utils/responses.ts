@@ -7,9 +7,10 @@ export const responseData = (res, status, message, data) => {
     });
 };
 
-export const responseMessage = (res, status, b_estatus, message) => {
+export const responseMessage = (res, status, b_estatus, message,data?) => {
     return res.status(status || 200).send({
         success: b_estatus,
         message: message,
+        data
     });
 };
