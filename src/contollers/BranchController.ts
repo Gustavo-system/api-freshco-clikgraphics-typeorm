@@ -26,7 +26,7 @@ export class BranchController{
                 deliveryType: req.body.deliveryType,
                 paymentMethod: req.body.paymentMethod,
                 online: (req.body.online == true || req.body.online == 1) ? true : false ,
-                image: req.file ? req.file.filename : null,
+                // image: req.file ? req.file.filename : null,
             });
             await getRepository(BranchModel).save(model);
             return responseMessage(resp, 201, true, 'Created');
@@ -59,7 +59,7 @@ export class BranchController{
             model.deliveryType = req.body.deliveryType;
             model.paymentMethod = req.body.paymentMethod;
             model.online = (req.body.online == true || req.body.online == 1) ? true : false;
-            model.image = req.file ? req.file.filename : model.image;
+            // model.image = req.file ? req.file.filename : model.image;
 
             await getRepository(BranchModel).save(model);
             return responseMessage(resp, 201, true, 'successful update');

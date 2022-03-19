@@ -74,8 +74,9 @@ export class ProductsController{
             model.vegan = (req.body.vegan == true || req.body.vegan == 1) ? true : false;
             model.image = req.file.filename
 
-            await getRepository(ProductModel).update({id_product:model.id_product},model);
-            return responseMessage(resp, 201, true, 'successful update',model);
+            await getRepository(ProductModel).save(model);
+            // return responseMessage(resp, 201, true, 'successful update');
+            return responseData(resp, 201, 'successful update', model);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
