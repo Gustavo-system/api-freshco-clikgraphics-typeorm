@@ -8,7 +8,7 @@ export class ProductsController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(ProductModel).find({relations:["branch", "category"]});
+            const model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -35,8 +35,8 @@ export class ProductsController{
                 vegan: (req.body.vegan == true || req.body.vegan == 1) ? true : false,
                 // image: req.file.filename
             });
-            await getRepository(ProductModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const product = await getRepository(ProductModel).save(model);
+            return responseData(resp, 200, 'Created', product);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -45,7 +45,7 @@ export class ProductsController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category"]});
+            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {
@@ -72,11 +72,10 @@ export class ProductsController{
             model.popular = (req.body.popular == true || req.body.popular == 1) ? true : false;
             model.new = (req.body.new == true || req.body.new == 1) ? true : false;
             model.vegan = (req.body.vegan == true || req.body.vegan == 1) ? true : false;
-            model.image = req.file.filename
+            // model.image = req.file.filename
 
-            await getRepository(ProductModel).save(model);
-            // return responseMessage(resp, 201, true, 'successful update');
-            return responseData(resp, 201, 'successful update', model);
+            const product = await getRepository(ProductModel).save(model);
+            return responseData(resp, 201, 'successful update', product);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');

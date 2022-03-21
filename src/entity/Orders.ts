@@ -22,7 +22,13 @@ export class OrdersModel {
     subtotal:number
 
     @Column({type:"float"})
-    total:number
+    total:number;
+
+    @Column({type:"text"})
+    comentario_branch:string;
+
+    @Column({type:"text"})
+    comentario_deliveryman:string;
 
     @Column({type:"boolean", default:false, nullable:true})
     accepted:boolean
@@ -63,14 +69,14 @@ export class OrdersModel {
         onDelete: "CASCADE",
         onUpdate:"CASCADE"
     })
-    @JoinColumn({name:"id_delivery"})
-    id_delivery: DeliveryManModel;
+    @JoinColumn({name:"delivery"})
+    delivery: DeliveryManModel;
 
     @Column({nullable: false})
     @OneToOne(type => BranchModel, {
         eager: true,
     })
-    @JoinColumn({name:"id_branch"})
-    id_branch: BranchModel;
+    @JoinColumn({name:"branch"})
+    branch: BranchModel;
 
 }

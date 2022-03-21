@@ -26,10 +26,11 @@ export class BranchController{
                 deliveryType: req.body.deliveryType,
                 paymentMethod: req.body.paymentMethod,
                 online: (req.body.online == true || req.body.online == 1) ? true : false ,
+                rate: req.body.rate,
                 // image: req.file ? req.file.filename : null,
             });
-            await getRepository(BranchModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const branch = await getRepository(BranchModel).save(model);
+            return responseData(resp, 201, 'Created', branch);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 500, false, 'Bad Request');
@@ -59,10 +60,11 @@ export class BranchController{
             model.deliveryType = req.body.deliveryType;
             model.paymentMethod = req.body.paymentMethod;
             model.online = (req.body.online == true || req.body.online == 1) ? true : false;
+            model.rate = req.body.rate;
             // model.image = req.file ? req.file.filename : model.image;
 
-            await getRepository(BranchModel).save(model);
-            return responseMessage(resp, 201, true, 'successful update');
+            const branch = await getRepository(BranchModel).save(model);
+            return responseData(resp, 201, 'successfull update', branch);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 500, false, 'Bad Request');

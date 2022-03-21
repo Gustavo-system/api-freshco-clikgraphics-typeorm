@@ -26,14 +26,16 @@ export class OrderController{
                 address: req.body.address,
                 subtotal: req.body.subtotal,
                 total: req.body.total,
+                comentario_branch: req.body.comentario_branch,
+                comentario_deliveryman: req.body.comentario_deliveryman,
                 ordena_recoje: req.body.ordena_recoje ? req.body.ordena_recoje : false,
                 payment_type: req.body.payment_type,
                 pin: req.body.pin,
-                id_delivery: req.body.id_delivery,
-                id_branch: req.body.id_branch,
+                delivery: req.body.id_delivery,
+                branch: req.body.id_branch,
             });
-            await getRepository(OrdersModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const order = await getRepository(OrdersModel).save(model);
+            return responseData(resp, 200, 'Created', order);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -59,7 +61,7 @@ export class OrderController{
             const { is_branch } = req.query;
 
             if(is_branch == "1"){
-                model.id_delivery = req.body.id_delivery;
+                model.delivery = req.body.id_delivery;
                 model.accepted = req.body.accepted;
                 model.cancelado = req.body.cancelado;
                 model.prepared = req.body.prepared;
@@ -104,6 +106,8 @@ export class OrderController{
                 model.address = req.body.address;
                 model.subtotal = req.body.subtotal;
                 model.total = req.body.total;
+                model.comentario_branch = req.body.comentario_branch;
+                model.comentario_deliveryman = req.body.comentario_deliveryman;
                 model.ordena_recoje = req.body.ordena_recoje ? req.body.ordena_recoje : false;
                 model.payment_type = req.body.payment_type;
                 model.cancelado = req.body.cancelado ? req.body.cancelado : false;
@@ -112,7 +116,7 @@ export class OrderController{
                 model.verified_pin = req.body.pin;
             }
 
-            await getRepository(OrdersModel).update({id_branch:model.id_branch},model);
+            await getRepository(OrdersModel).update({branch:model.branch},model);
             return responseMessage(resp, 201, true, 'successful update');
         } catch (error) {
             console.log(error)

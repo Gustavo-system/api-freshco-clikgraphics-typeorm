@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne } from 'typeorm';
 import { AddressModel } from './Address';
+import { BranchModel } from './Branch';
 
 @Entity({name:"User"})
 export class UserModel {
@@ -37,9 +38,6 @@ export class UserModel {
     @Column({nullable:true})
     image:string;
 
-    @Column({nullable:true})
-    branchs:string;
-
     @Column({nullable:true, default:false})
     pendingOrder:boolean;
 
@@ -51,5 +49,11 @@ export class UserModel {
 
     @OneToMany(type => AddressModel, (address) => address.id_user)
     address: AddressModel[];
+
+    @OneToOne(() => BranchModel, {
+        eager: true
+    })
+    @JoinColumn({name:"branch"})
+    branch: BranchModel;
 
 }

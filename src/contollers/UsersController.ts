@@ -36,13 +36,12 @@ export class UserController{
                 notificationsEnabled: req.body.notificationsEnabled,
                 birthday: req.body.birthday,
                 uuid: customId,
-                branchs: req.body.branch,
+                branch: req.body.branch,
                 pendingOrder: req.body.pendingOrder
                 // image: req.file ? req.file.fieldname : null,
             });
-            console.log(model);
-            await getRepository(UserModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const user = await getRepository(UserModel).save(model);
+            return responseData(resp, 200, 'Datos obtenidos', user);
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');
@@ -66,20 +65,20 @@ export class UserController{
             const model = await getRepository(UserModel).findOne(req.body.id);
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
-            model.names = req.body.names,
-            model.phone = req.body.phone,
-            model.email = req.body.email,
-            model.password = req.body.password,
-            model.username = req.body.username,
-            model.role = req.body.role,
-            model.active = req.body.active ? req.body.active : true,
-            model.notificationsEnabled = req.body.notificationsEnabled ? req.body.notificationsEnabled : false,
-            model.birthday = req.body.birthday,
-            model.image = req.file.fieldname,
+            model.names = req.body.names;
+            model.phone = req.body.phone;
+            model.email = req.body.email;
+            model.password = req.body.password;
+            model.username = req.body.username;
+            model.role = req.body.role;
+            model.active = req.body.active ? req.body.active : true;
+            model.notificationsEnabled = req.body.notificationsEnabled ? req.body.notificationsEnabled : false;
+            model.birthday = req.body.birthday;
+            model.branch = req.body.branch;
+            // model.image = req.file.fieldname;
 
-            await getRepository(UserModel).update({id_user:model.id_user},model);
-
-            return responseMessage(resp, 200, true, 'successful update',model);
+            const user = await getRepository(UserModel).update({id_user:model.id_user},model);
+            return responseMessage(resp, 200, true, 'successful update', user);
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');

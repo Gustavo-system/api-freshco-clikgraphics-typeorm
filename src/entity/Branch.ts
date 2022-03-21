@@ -14,24 +14,27 @@ export class BranchModel {
 
     @Column()
     address:string;
-    
+
     @Column({nullable:true})
     shippingCost:number;
 
     @Column({nullable:true})
-    minimumCost:number
+    minimumCost:number;
 
     @Column()
-    deliveryType:string
+    deliveryType:string;
 
     @Column()
-    paymentMethod:string
+    paymentMethod:string;
 
     @Column({default:true})
     online:boolean
+    
+    @Column({type:"float"})
+    rate:number;
 
     @Column({nullable:true})
-    image:string
+    image:string;
 
     @OneToMany(type => ProductModel, (products) => products.branch)
     products: ProductModel[];
