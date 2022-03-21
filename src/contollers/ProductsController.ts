@@ -87,7 +87,7 @@ export class ProductsController{
             const model = await getRepository(ProductModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
-            await getRepository(ProductModel).delete(req.body.id);
+            await getRepository(ProductModel).delete(req.params.id);
             return responseMessage(resp, 201, true, 'was successfully deleted');
         } catch (error) {
             console.log(error)

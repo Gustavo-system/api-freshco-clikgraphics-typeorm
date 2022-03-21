@@ -12,6 +12,7 @@ import { DeliveryMan } from "../configs/libs/multer/ImagenesMulter";
 import AuthController from "../contollers/AuthController";
 import upload from "../configs/libs/multer/multer";
 // import multer from "../configs/libs/multer/multer";
+import { AdicionalesController } from '../contollers/AdicionalesController';
 
 const router = Router();
 
@@ -45,6 +46,12 @@ router.post('/branchs', upload.single('image'), BranchController.post);
 router.get('/branchs/:id', BranchController.getID);
 router.put('/branchs/:id', BranchController.update);
 router.delete('/branchs/:id', BranchController.delete);
+
+router.get('/productos_adicionales', AdicionalesController.get);
+router.post('/productos_adicionales', AdicionalesController.post);
+router.get('/productos_adicionales/:id', AdicionalesController.getID);
+router.put('/productos_adicionales/:id', AdicionalesController.update);
+router.delete('/productos_adicionales/:id', AdicionalesController.delete);
 
 router.get('/products', ProductsController.get);
 router.post('/products', upload.single('image'), ProductsController.post);

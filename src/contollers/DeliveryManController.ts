@@ -70,7 +70,7 @@ export class DeliveryManController{
             const model = await getRepository(DeliveryManModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
-            await getRepository(DeliveryManModel).delete(req.body.id);
+            await getRepository(DeliveryManModel).delete(req.params.id);
             return responseMessage(resp, 201, true, 'was successfully deleted');
         } catch (error) {
             console.log(error)

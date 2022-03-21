@@ -90,7 +90,7 @@ export class UserController{
             const model = await getRepository(UserModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
-            await getRepository(UserModel).delete(req.body.id);
+            await getRepository(UserModel).delete(req.params.id);
             return responseMessage(resp, 201, true, 'was successfully deleted');
         } catch (error) {
             console.log(error)

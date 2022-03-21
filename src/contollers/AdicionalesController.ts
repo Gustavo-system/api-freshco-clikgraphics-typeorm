@@ -1,32 +1,30 @@
 import { Request, Response } from 'express';
 import { responseMessage, responseData } from '../utils/responses';
 import { getRepository } from 'typeorm';
-import { AddressModel } from '../entity/Address';
+import { AdicionalesModel } from '../entity/ProductosAdicionales';
 
-export class AddressController{
+export class AdicionalesController{
 
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(AddressModel).find();
+            const model = await getRepository(AdicionalesModel).find({relations:["product"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
             console.log(error)
-            return responseMessage(resp, 500, false, 'Internal Server Error');
+            return responseMessage(resp, 400, false, 'Internal Server Error');
         }
     }
 
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = getRepository(AddressModel).create({
-                address: req.body.address,
-                latitud: req.body.latitud,
-                longitud: req.body.longitud,
-                id_user: req.body.id_user
+            const model = getRepository(AdicionalesModel).create({
+                name: req.body.name,
+                product: req.body.product
             });
-            await getRepository(AddressModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const adicional = await getRepository(AdicionalesModel).save(model);
+            return responseData(resp, 200, 'Created', adicional);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -35,7 +33,7 @@ export class AddressController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(AddressModel).findOne(req.params.id);
+            const model = await getRepository(AdicionalesModel).findOne(req.params.id, {relations:["product"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {
@@ -46,15 +44,15 @@ export class AddressController{
 
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(AddressModel).findOne(req.params.id);
-            if(!model) return responseMessage(resp, 404, false, 'Not Found')
+    
+            const model = await getRepository(AdicionalesModel).findOne(req.params.id);
+            if(!model) return responseMessage(resp, 404, false, 'Not Found');
 
-            model.address = req.body.address,
-            model.latitud = req.body.latitud,
-            model.longitud = req.body.longitud,
+            model.name = req.body.name;
+            model.product = req.body.product;
 
-            await getRepository(AddressModel).save(model);
-            return responseMessage(resp, 201, true, 'successful update');
+            const adicional = await getRepository(AdicionalesModel).save(model);
+            return responseData(resp, 201, 'successful update', adicional);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -63,10 +61,10 @@ export class AddressController{
 
     static delete = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(AddressModel).findOne(req.params.id);
+            const model = await getRepository(AdicionalesModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
-            await getRepository(AddressModel).delete(req.params.id);
+            await getRepository(AdicionalesModel).delete(req.params.id);
             return responseMessage(resp, 201, true, 'was successfully deleted');
         } catch (error) {
             console.log(error)

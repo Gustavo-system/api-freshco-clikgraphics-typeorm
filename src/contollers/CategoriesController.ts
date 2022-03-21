@@ -70,7 +70,7 @@ export class CategoriesController{
             const model = await getRepository(CategoriesModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
-            await getRepository(CategoriesModel).delete(req.body.id);
+            await getRepository(CategoriesModel).delete(req.params.id);
             return responseMessage(resp, 201, true, 'was successfully deleted');
         } catch (error) {
             console.log(error)
