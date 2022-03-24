@@ -31,6 +31,9 @@ export class OrdersModel {
     comentario_deliveryman:string;
 
     @Column({type:"boolean", default:false, nullable:true})
+    pagado:boolean
+
+    @Column({type:"boolean", default:false, nullable:true})
     accepted:boolean
 
     @Column({type:"boolean", default:false, nullable:true})

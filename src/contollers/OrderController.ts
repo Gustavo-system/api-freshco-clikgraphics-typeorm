@@ -2,6 +2,7 @@ import { getRepository } from 'typeorm';
 import { Request, Response } from 'express';
 import { responseMessage, responseData } from '../utils/responses';
 import { OrdersModel } from '../entity/Orders';
+import { generatePymentMethod, generatePaymentIntent } from '../configs/stripe';
 
 export class OrderController{
 
@@ -135,6 +136,54 @@ export class OrderController{
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
         }
+    }
+
+
+    static payOrder = async (req:Request, resp:Response) => {
+        try {
+            console.log(req.body);
+            const id_order = req.params.id;
+            const { token } = req.body;
+
+            const order = await getRepository(OrdersModel).findOne({where:{id_order}});
+
+            if(!order) return responseMessage(resp, 404, false, 'Order not exist');
+
+            if(order.pagado == true) return responseMessage(resp, 200, true, 'Esta orden ya fue pagada');
+
+            const responseMethod = await generatePymentMethod(token);
+
+            const responsePaymentIntent = await generatePaymentIntent({
+                amount: order.total,
+                branch: order.branch.name,
+                payment_method: responseMethod.id
+            });
+
+            const ordenPagada = getRepository(OrdersModel).merge(order, {
+                pagado: true
+            })
+            await getRepository(OrdersModel).save(ordenPagada);
+
+            return responseData(resp, 200, 'Orden pagada con exito', responsePaymentIntent);
+        } catch (error) {
+            console.log(error);
+            return responseMessage(resp, 400, false, 'Error al procesar pago');
+        }
+
+        // Bucar una orden del producto en nuestra base de datos
+        // const customer = await stripe.customers.create({
+        //     email: req.body.stripeEmail,
+        //     source: req.body.stripeToken
+        // })
+
+        // const charge = await stripe.charges.create({
+        //     amount: '3000',
+        //     currency: 'MXN',
+        //     customer: customer.id,
+        // })
+
+        // resp.send(charge);
+
     }
 
 }
