@@ -27,7 +27,7 @@ export class BranchController{
                 paymentMethod: req.body.paymentMethod,
                 online: (req.body.online == true || req.body.online == 1) ? true : false ,
                 rate: req.body.rate,
-                // image: req.file ? req.file.filename : null,
+                image: req.file ? req.file.filename : "sin_imagen.png",
             });
             const branch = await getRepository(BranchModel).save(model);
             return responseData(resp, 201, 'Created', branch);

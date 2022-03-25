@@ -22,8 +22,8 @@ export class DeliveryManController{
                 model: req.body.model,
                 seguro: req.body.seguro,
                 phone: req.body.phone,
-                photo_seguro : req.files['photo_seguro'][0].filename,
-                photo_licencia : req.files['photo_licencia'][0].filename,
+                photo_seguro : req.files['photo_seguro'] ? req.files['photo_seguro'][0].filename : 'sin_imagen.png',
+                photo_licencia : req.files['photo_licencia'] ? req.files['photo_licencia'][0].filename : 'sin_imagen.png',
                 id_user: req.body.id_user
             });
             await getRepository(DeliveryManModel).save(model);

@@ -37,8 +37,8 @@ export class UserController{
                 birthday: req.body.birthday,
                 uuid: customId,
                 branch: req.body.branch,
-                pendingOrder: req.body.pendingOrder
-                // image: req.file ? req.file.fieldname : null,
+                pendingOrder: req.body.pendingOrder,
+                image: req.file ? req.file.filename : 'sin_imagen.png',
             });
             const user = await getRepository(UserModel).save(model);
             return responseData(resp, 200, 'Datos obtenidos', user);

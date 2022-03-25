@@ -33,7 +33,7 @@ export class ProductsController{
                 popular: (req.body.popular == true || req.body.popular == 1) ? true : false,
                 new: (req.body.new == true || req.body.new == 1) ? true : false,
                 vegan: (req.body.vegan == true || req.body.vegan == 1) ? true : false,
-                // image: req.file.filename
+                image: req.file ? req.file.filename : 'sin_imagen.png'
             });
             const product = await getRepository(ProductModel).save(model);
             return responseData(resp, 200, 'Created', product);

@@ -3,6 +3,7 @@ import express = require('express');
 import cors = require('cors');
 import morgan = require('morgan');
 import bodyParser = require('body-parser');
+import path = require('path');
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ export class Server{
         this.app.use(morgan('dev'));
         this.app.use(bodyParser.urlencoded({ extended: true }));
         this.app.use(bodyParser.json());
+
+        this.app.use(express.static(path.join(__dirname, '../public')));
 
         // routes
         this.app.use('/api/v2/freshco', router);

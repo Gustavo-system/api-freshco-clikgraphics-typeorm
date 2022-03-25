@@ -36,7 +36,7 @@ router.delete('/address/:id', AddressController.delete);
  * tablas trabajo
  */
 router.get('/users', UserController.get);
-router.post('/users', UserController.post);
+router.post('/users', upload.single('image'), UserController.post);
 router.get('/users/:id', UserController.getID);
 router.put('/users/:id', UserController.update);
 router.delete('/user/:id', UserController.delete);
