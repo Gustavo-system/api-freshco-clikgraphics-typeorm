@@ -21,6 +21,7 @@ export class AdicionalesController{
         try {
             const model = getRepository(AdicionalesModel).create({
                 name: req.body.name,
+                price: req.body.price,
                 product: req.body.product
             });
             const adicional = await getRepository(AdicionalesModel).save(model);
@@ -49,6 +50,7 @@ export class AdicionalesController{
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
 
             model.name = req.body.name;
+            model.price = req.body.price;
             model.product = req.body.product;
 
             const adicional = await getRepository(AdicionalesModel).save(model);

@@ -17,7 +17,7 @@ export class ProductModel {
     description:string;
 
     @Column({nullable:true})
-    price:string;
+    price:number;
 
     @Column({nullable:true})
     discount:string;

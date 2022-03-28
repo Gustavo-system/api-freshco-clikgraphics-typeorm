@@ -11,6 +11,9 @@ export class AdicionalesModel {
     @Column({type:"text"})
     name:string;
 
+    @Column({type:"float"})
+    price:number;
+
     @ManyToOne(type => ProductModel, (product) => product.adicionales)
     @JoinColumn({name:'product'})
     product: ProductModel;
