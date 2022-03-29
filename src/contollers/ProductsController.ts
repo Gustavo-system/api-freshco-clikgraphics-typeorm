@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { responseMessage, responseData } from '../utils/responses';
 import { getRepository } from 'typeorm';
 import { ProductModel } from '../entity/Products';
+import { AdicionalesModel } from '../entity/ProductosAdicionales';
 
 export class ProductsController{
 
@@ -19,6 +20,18 @@ export class ProductsController{
 
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try {
+
+            const { adicionales } = req.body;
+            let productosAdicionales:any[] = [];
+
+            for (let i = 0; i < adicionales.length; i++) {
+                const elemento = adicionales[i];
+                // console.log(elemento);
+                const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
+                // console.log(adicional);
+                productosAdicionales.push(adicional);
+            }
+
             const model = getRepository(ProductModel).create({
                 name: req.body.name,
                 description: req.body.description,
@@ -33,8 +46,11 @@ export class ProductsController{
                 popular: (req.body.popular == true || req.body.popular == 1) ? true : false,
                 new: (req.body.new == true || req.body.new == 1) ? true : false,
                 vegan: (req.body.vegan == true || req.body.vegan == 1) ? true : false,
-                image: req.file ? req.file.filename : 'sin_imagen.png'
+                image: req.file ? req.file.filename : 'sin_imagen.png',
+                adicionales: productosAdicionales
             });
+
+            // return resp.json(model);
             const product = await getRepository(ProductModel).save(model);
             return responseData(resp, 200, 'Created', product);
         } catch (error) {

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne, ManyToMany } from 'typeorm';
 import { ProductModel } from './Products';
 
 @Entity({name:"Products_Adicionales"})
@@ -14,8 +14,7 @@ export class AdicionalesModel {
     @Column({type:"float"})
     price:number;
 
-    @ManyToOne(type => ProductModel, (product) => product.adicionales)
-    @JoinColumn({name:'product'})
-    product: ProductModel;
+    @ManyToMany(type => ProductModel, (product) => product.adicionales)
+    products: ProductModel[];
 
 }

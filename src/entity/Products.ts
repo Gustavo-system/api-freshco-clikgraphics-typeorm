@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { BranchModel } from './Branch';
 import { CategoriesModel } from './Categories';
 import { AdicionalesModel } from './ProductosAdicionales';
@@ -54,7 +54,8 @@ export class ProductModel {
     @JoinColumn({name:'category'})
     category: CategoriesModel;
 
-    @OneToMany(type => AdicionalesModel, (adicionale) => adicionale.product)
+    @ManyToMany(type => AdicionalesModel, (adicionales) => adicionales.products)
+    @JoinTable({name:'tr_adicionales'})
     adicionales: AdicionalesModel[];
 
 }
