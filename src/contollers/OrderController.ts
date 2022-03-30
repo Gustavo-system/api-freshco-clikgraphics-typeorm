@@ -149,7 +149,7 @@ export class OrderController{
 
             if(!order) return responseMessage(resp, 404, false, 'Order not exist');
 
-            if(order.pagado == true) return responseMessage(resp, 200, true, 'Esta orden ya fue pagada');
+            if(order.pagado == true) return responseMessage(resp, 406, true, 'Esta orden ya fue pagada');
 
             const responseMethod = await generatePymentMethod(token);
 
