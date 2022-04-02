@@ -30,8 +30,9 @@ export class CategoriesController{
                 name: req.body.name,
                 id_branch: req.body.id_branch,
             });
-            await getRepository(CategoriesModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const categoria = await getRepository(CategoriesModel).save(model);
+            // return responseMessage(resp, 201, true, 'Created');
+            return responseData(resp, 200, 'Created', categoria);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -57,8 +58,9 @@ export class CategoriesController{
             model.name = req.body.name;
             model.id_branch = req.body.id_branch;
 
-            await getRepository(CategoriesModel).save(model);
-            return responseMessage(resp, 201, true, 'successful update');
+            const categoria = await getRepository(CategoriesModel).save(model);
+            return responseData(resp, 200, 'successful update', categoria);
+
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');

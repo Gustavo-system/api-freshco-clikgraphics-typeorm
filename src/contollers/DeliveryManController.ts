@@ -26,8 +26,8 @@ export class DeliveryManController{
                 photo_licencia : req.files['photo_licencia'] ? req.files['photo_licencia'][0].filename : 'sin_imagen.png',
                 id_user: req.body.id_user
             });
-            await getRepository(DeliveryManModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            const delivery = await getRepository(DeliveryManModel).save(model);
+            return responseData(resp, 201, 'Created', delivery);
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');
@@ -57,8 +57,9 @@ export class DeliveryManController{
             model.photo_licencia = req.files['photo_licencia'][0].filename;
             model.id_user = req.body.id_user;
 
-            await getRepository(DeliveryManModel).save(model);
-            return responseMessage(resp, 200, true, 'successful update');
+            const delivery = await getRepository(DeliveryManModel).save(model);
+            // return responseMessage(resp, 200, true, 'successful update');
+            return responseData(resp, 200, 'successful update', delivery)
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');
