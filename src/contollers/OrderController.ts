@@ -9,7 +9,7 @@ export class OrderController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(OrdersModel).find();
+            const model = await getRepository(OrdersModel).find({relations:["barnch", "delivery"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -45,7 +45,7 @@ export class OrderController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(OrdersModel).findOne(req.params.id);
+            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["barnch", "delivery"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {

@@ -7,7 +7,7 @@ export class DeliveryManController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try{
             let message:string = "OK"
-            const model = await getRepository(DeliveryManModel).find();
+            const model = await getRepository(DeliveryManModel).find({relations:["orders"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         }catch(err){
@@ -36,7 +36,7 @@ export class DeliveryManController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try{
-            const model = await getRepository(DeliveryManModel).findOne(req.body.id);
+            const model = await getRepository(DeliveryManModel).findOne(req.body.id, {relations:["orders"]});
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             return responseData(resp, 200, 'Datos obtenidos', model);
         }catch(err){

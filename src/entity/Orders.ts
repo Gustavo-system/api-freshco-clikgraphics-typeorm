@@ -66,20 +66,12 @@ export class OrdersModel {
     @Column({type:"boolean", default:false, nullable:true})
     verified_pin:boolean
 
-    @Column({nullable: true, unique: false})
-    @OneToOne(type => DeliveryManModel, {
-        eager: true,
-        onDelete: "CASCADE",
-        onUpdate:"CASCADE"
-    })
-    @JoinColumn({name:"delivery"})
-    delivery: DeliveryManModel;
-
-    @Column({nullable: false})
-    @OneToOne(type => BranchModel, {
-        eager: true,
-    })
-    @JoinColumn({name:"branch"})
+    @ManyToOne(type => BranchModel, (branch) => branch.orders)
+    @JoinColumn({name:'branch'})
     branch: BranchModel;
+
+    @ManyToOne(type => DeliveryManModel, (delivery) => delivery.orders)
+    @JoinColumn({name:'delivery'})
+    delivery : DeliveryManModel;
 
 }

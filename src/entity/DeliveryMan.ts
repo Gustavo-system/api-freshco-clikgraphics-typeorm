@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { UserModel } from './User';
+import { OrdersModel } from './Orders';
 
 @Entity({name:"Delivery_man"})
 
@@ -23,11 +24,13 @@ export class DeliveryManModel {
     @Column({nullable:true})
     photo_licencia:string
 
-    @Column({nullable: false, unique: true})
     @OneToOne(type => UserModel, {
         eager: true,
     })
     @JoinColumn({name:"id_user"})
     id_user: UserModel;
+
+    @OneToMany(type => OrdersModel, (order) => order.delivery)
+    orders: OrdersModel[];
 
 }

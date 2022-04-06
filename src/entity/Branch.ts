@@ -1,6 +1,7 @@
 import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from "typeorm";
 import { ProductModel } from './Products';
 import { CategoriesModel } from './Categories';
+import { OrdersModel } from './Orders';
 
 @Entity({name:"Branch"})
 
@@ -41,5 +42,8 @@ export class BranchModel {
 
     @OneToMany(type => CategoriesModel, (category) => category.id_branch)
     categories: CategoriesModel[];
+
+    @OneToMany(type => OrdersModel, (order) => order.branch)
+    orders: OrdersModel[];
 
 }
