@@ -18,6 +18,34 @@ export class OrderController{
         }
     }
 
+    static get_order_branch = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            let message:string = "OK"
+            const branch = req.params.id_branch;
+
+            const model = await getRepository(OrdersModel).find({where:{branch} ,relations:["barnch", "delivery"]});
+            if(model.length == 0) message = 'Empty';
+            return responseData(resp, 200, message, model);
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Internal Server Error');
+        }
+    }
+
+    static get_orden_delivery = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            let message:string = "OK"
+            const delivery = req.params.id_delivery;
+
+            const model = await getRepository(OrdersModel).find({where:{delivery} ,relations:["barnch", "delivery"]});
+            if(model.length == 0) message = 'Empty';
+            return responseData(resp, 200, message, model);
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Internal Server Error');
+        }
+    }
+
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try {
             const date = new Date();

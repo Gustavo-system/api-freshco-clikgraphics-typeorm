@@ -66,6 +66,8 @@ router.put('/delivery_man/:id', DeliveryMan, DeliveryManController.update);
 router.delete('/delivery_man/:id', DeliveryManController.delete);
 
 router.get('/orders', OrderController.get);
+router.get('/orders_branch/:id_branch', OrderController.get_order_branch);
+router.get('/orders_delivery/:id_delivery', OrderController.get_orden_delivery);
 router.post('/orders', OrderController.post);
 router.get('/orders/:id', OrderController.getID);
 router.put('/orders/:id', OrderController.update);
