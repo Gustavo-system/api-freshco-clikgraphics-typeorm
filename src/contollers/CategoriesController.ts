@@ -11,10 +11,10 @@ export class CategoriesController{
             let model:any = [];
             const { id_branch } = req.query;
             if(id_branch){
-                model = await getRepository(CategoriesModel).find({ where:id_branch ,relations:["branch", "products"]});
+                model = await getRepository(CategoriesModel).find({ where:id_branch ,relations:["id_branch", "products"]});
 
             }else{
-                model = await getRepository(CategoriesModel).find({relations:["branch", "products"]});
+                model = await getRepository(CategoriesModel).find({relations:["id_branch", "products"]});
             }
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
@@ -41,7 +41,7 @@ export class CategoriesController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(CategoriesModel).findOne(req.params.id, {relations:["products", "branch"]});
+            const model = await getRepository(CategoriesModel).findOne(req.params.id, {relations:["products", "id_branch"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {

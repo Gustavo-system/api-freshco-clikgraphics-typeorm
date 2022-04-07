@@ -9,7 +9,7 @@ export class OrderController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(OrdersModel).find({relations:["barnch", "delivery"]});
+            const model = await getRepository(OrdersModel).find({relations:["branch", "delivery"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -23,7 +23,7 @@ export class OrderController{
             let message:string = "OK"
             const branch = req.params.id_branch;
 
-            const model = await getRepository(OrdersModel).find({where:{branch} ,relations:["barnch", "delivery"]});
+            const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -37,7 +37,7 @@ export class OrderController{
             let message:string = "OK"
             const delivery = req.params.id_delivery;
 
-            const model = await getRepository(OrdersModel).find({where:{delivery} ,relations:["barnch", "delivery"]});
+            const model = await getRepository(OrdersModel).find({where:{delivery} ,relations:["branch", "delivery"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -73,7 +73,7 @@ export class OrderController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["barnch", "delivery"]});
+            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["branch", "delivery"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {
