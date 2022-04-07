@@ -21,9 +21,16 @@ export class OrderController{
     static get_order_user = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const branch = req.params.id_branch;
+            const { user, date } = req.query;
+            // const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
+            const model = await getRepository(OrdersModel).createQueryBuilder("order")
+                                                          .leftJoinAndSelect('order.branch', 'branch')
+                                                          .leftJoinAndSelect('order.delivery', 'delivery')
+                                                          .leftJoinAndSelect('order.address', 'address')
+                                                          .where("order.user = :user", {user:user})
+                                                          .andWhere("order.date = :date", {date:date})
+                                                          .getMany()
 
-            const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -45,9 +52,6 @@ export class OrderController{
                                                           .where("order.branch = :branch", {branch:branch})
                                                           .andWhere("order.date = :date", {date:date})
                                                           .getMany()
-                                                        //   .relation(OrdersModel,"branch")
-                                                        //   .relation(OrdersModel,"delivery")
-                                                        //   .loadMany()
 
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
@@ -60,9 +64,17 @@ export class OrderController{
     static get_orden_delivery = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const delivery = req.params.id_delivery;
+            const { delivery, date } = req.query;
 
-            const model = await getRepository(OrdersModel).find({where:{delivery} ,relations:["branch", "delivery"]});
+            // const model = await getRepository(OrdersModel).find({where:{delivery} ,relations:["branch", "delivery"]});
+            const model = await getRepository(OrdersModel).createQueryBuilder("order")
+                                                          .leftJoinAndSelect('order.branch', 'branch')
+                                                          .leftJoinAndSelect('order.delivery', 'delivery')
+                                                          .leftJoinAndSelect('order.address', 'address')
+                                                          .where("order.delivery = :delivery", {delivery:delivery})
+                                                          .andWhere("order.date = :date", {date:date})
+                                                          .getMany()
+
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
