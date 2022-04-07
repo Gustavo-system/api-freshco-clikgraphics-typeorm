@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { DeliveryManModel } from './DeliveryMan';
 import { BranchModel } from './Branch';
+import { UserModel } from './User';
+import { AddressModel } from './Address';
 
 @Entity({name:"Orders"})
 
@@ -15,8 +17,8 @@ export class OrdersModel {
     @Column({type:"text", nullable:true})
     products:string
 
-    @Column({type:"text"})
-    address:string
+    // @Column({type:"text"})
+    // address:string
 
     @Column({type:"float"})
     subtotal:number
@@ -73,5 +75,15 @@ export class OrdersModel {
     @ManyToOne(type => DeliveryManModel, (delivery) => delivery.orders)
     @JoinColumn({name:'delivery'})
     delivery : DeliveryManModel;
+
+    @ManyToOne(type => UserModel, (user) => user.id_user)
+    @JoinColumn({name:'user'})
+    user : UserModel;
+
+    @OneToOne(() => AddressModel, {
+        eager: true
+    })
+    @JoinColumn({name:"address"})
+    address: AddressModel;
 
 }

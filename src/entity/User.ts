@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne } from 'typeorm';
 import { AddressModel } from './Address';
 import { BranchModel } from './Branch';
+import { OrdersModel } from './Orders';
 
 @Entity({name:"User"})
 export class UserModel {
@@ -55,5 +56,8 @@ export class UserModel {
     })
     @JoinColumn({name:"branch"})
     branch: BranchModel;
+
+    @OneToMany(type => OrdersModel, (order) => order.user)
+    orders: OrdersModel[];
 
 }

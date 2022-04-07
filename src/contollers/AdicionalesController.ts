@@ -9,7 +9,7 @@ export class AdicionalesController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(AdicionalesModel).find({relations:["products"]});
+            const model = await getRepository(AdicionalesModel).find({relations:["products", "branch"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -45,7 +45,7 @@ export class AdicionalesController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(AdicionalesModel).findOne(req.params.id, {relations:["products"]});
+            const model = await getRepository(AdicionalesModel).findOne(req.params.id, {relations:["products", "branch"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {

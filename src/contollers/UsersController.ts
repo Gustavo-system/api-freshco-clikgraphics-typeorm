@@ -10,7 +10,7 @@ export class UserController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try{
             let message:string = "OK"
-            const model = await getRepository(UserModel).find({relations:["address"]});
+            const model = await getRepository(UserModel).find({relations:["address", "orders"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         }catch(err){
@@ -50,7 +50,7 @@ export class UserController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try{
-            const model = await getRepository(UserModel).findOne(req.body.id, {relations:["address"]});
+            const model = await getRepository(UserModel).findOne(req.body.id, {relations:["address", "orders"]});
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             model.password = "";
             return responseData(resp, 200, 'Datos obtenidos', model);

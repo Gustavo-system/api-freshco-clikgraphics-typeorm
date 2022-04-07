@@ -7,7 +7,7 @@ export class BranchController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(BranchModel).find({relations:["products", "categories", "orders"]});
+            const model = await getRepository(BranchModel).find({relations:["products", "categories", "orders", "adicionales"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -39,7 +39,7 @@ export class BranchController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(BranchModel).findOne(req.params.id, {relations:["products", "categories", "orders"]});
+            const model = await getRepository(BranchModel).findOne(req.params.id, {relations:["products", "categories", "orders", "adicionales"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'OK', model);
         } catch (error) {

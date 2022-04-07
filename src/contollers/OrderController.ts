@@ -18,12 +18,37 @@ export class OrderController{
         }
     }
 
-    static get_order_branch = async (req:Request, resp:Response):Promise<Response> => {
+    static get_order_user = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
             const branch = req.params.id_branch;
 
             const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
+            if(model.length == 0) message = 'Empty';
+            return responseData(resp, 200, message, model);
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Internal Server Error');
+        }
+    }
+
+    static get_order_branch = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            let message:string = "OK"
+            const { branch, date } = req.query;
+
+            // const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
+            const model = await getRepository(OrdersModel).createQueryBuilder("order")
+                                                          .leftJoinAndSelect('order.branch', 'branch')
+                                                          .leftJoinAndSelect('order.delivery', 'delivery')
+                                                          .leftJoinAndSelect('order.address', 'address')
+                                                          .where("order.branch = :branch", {branch:branch})
+                                                          .andWhere("order.date = :date", {date:date})
+                                                          .getMany()
+                                                        //   .relation(OrdersModel,"branch")
+                                                        //   .relation(OrdersModel,"delivery")
+                                                        //   .loadMany()
+
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
