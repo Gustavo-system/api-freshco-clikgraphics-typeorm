@@ -1,30 +1,13 @@
-// import multer = require("multer");
-// import path = require("path");
 
-// const storage = multer.diskStorage({
-//     destination: (req, file, collback) =>{
-//         collback(null, './uploads')
-//     },
-//     filename:(req, file, callback) => {
-//         const ext = file.originalname.split('.').pop;
-//         callback(null, `${Date.now()}.${ext}`);
-//     }
-// });
-
-// const upload = multer({storage:storage})
-
-// export default upload;
-
-import * as multer from 'multer'
+import * as multer from 'multer';
+import path = require("path");
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) =>{
-        cb(null, 'public/uploads')   
+    destination: function(req, file, collback){
+        collback(null, 'dist/public/uploads')
     },
-    filename:(req, file, callback) => {
-        const date =  Date.now();
-        const ext = file.originalname.split('.').pop();
-        callback(null, `${date}.${ext}`);
+    filename: (req, file, collback) =>{
+        collback(null, Date.now() + path.extname(file.originalname))
     }
 });
 
