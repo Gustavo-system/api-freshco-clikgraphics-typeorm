@@ -33,7 +33,8 @@ export class AdicionalesController{
             const model = getRepository(AdicionalesModel).create({
                 name: req.body.name,
                 price: req.body.price,
-                products: productosAdicionales
+                products: productosAdicionales,
+                branch: req.body.id_branch
             });
             const adicional = await getRepository(AdicionalesModel).save(model);
             return responseData(resp, 200, 'Created', adicional);
@@ -60,9 +61,21 @@ export class AdicionalesController{
             const model = await getRepository(AdicionalesModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
 
+            const { productos } = req.body;
+            let productosAdicionales:any[] = [];
+
+            if(productos.length > 0){
+
+                for (let i = 0; i < productos.length; i++) {
+                    const id_product = productos[i];
+                    const product = await getRepository(ProductModel).findOne({where:{id_product}});
+                    productosAdicionales.push(product);
+                }
+            }
+
             model.name = req.body.name;
             model.price = req.body.price;
-            // model.product = req.body.product;
+            model.products = productosAdicionales;
 
             const adicional = await getRepository(AdicionalesModel).save(model);
             return responseData(resp, 201, 'successful update', adicional);

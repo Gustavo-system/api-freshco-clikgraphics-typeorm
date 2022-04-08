@@ -5,12 +5,14 @@ import { responseData, responseMessage } from '../utils/responses';
 
 import { v4 as uuidv4 } from 'uuid';
 import { encrypted } from "../utils/helpers/helpers";
+import { BranchModel } from '../entity/Branch';
 
 export class UserController{
+
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try{
             let message:string = "OK"
-            const model = await getRepository(UserModel).find({relations:["address", "orders"]});
+            const model = await getRepository(UserModel).find({relations:["address", "orders", "branch"]});
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         }catch(err){
@@ -22,7 +24,18 @@ export class UserController{
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try{
             const customId = uuidv4();
-            const { password } = req.body;
+            const { password, branchs = [] } = req.body;
+            let AllBranchForThis:any[] = [];
+
+            if(branchs.length > 0){
+
+                for (let i = 0; i < branchs.length; i++) {
+                    const id_branch = branchs[i];
+                    console.log(id_branch);
+                    const branch = await getRepository(BranchModel).findOne({where:{id_branch:id_branch}});
+                    AllBranchForThis.push(branch);
+                }
+            }
 
             const hash_password = await encrypted(password);
             const model = getRepository(UserModel).create({
@@ -36,7 +49,7 @@ export class UserController{
                 notificationsEnabled: req.body.notificationsEnabled,
                 birthday: req.body.birthday,
                 uuid: customId,
-                branch: req.body.branch,
+                branch: AllBranchForThis,
                 pendingOrder: req.body.pendingOrder,
                 image: req.file ? req.file.filename : 'sin_imagen.png',
             });
@@ -50,7 +63,7 @@ export class UserController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try{
-            const model = await getRepository(UserModel).findOne(req.body.id, {relations:["address", "orders"]});
+            const model = await getRepository(UserModel).findOne(req.body.id, {relations:["address", "orders", "branch"]});
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             model.password = "";
             return responseData(resp, 200, 'Datos obtenidos', model);
@@ -65,20 +78,44 @@ export class UserController{
             const model = await getRepository(UserModel).findOne(req.body.id);
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
+            // const deleteBranchs = await getRepository()
+
+            const { branchs = [], changePassword = false } = req.body;
+            let AllBranchForThis:any[] = [];
+
+            if(branchs.length > 0){
+
+                for (let i = 0; i < branchs.length; i++) {
+                    const id_branch = branchs[i];
+                    console.log(id_branch);
+                    const branch = await getRepository(BranchModel).findOne({where:{id_branch}});
+                    AllBranchForThis.push(branch);
+                }
+            }
+
+            console.log(AllBranchForThis);
+
+            if(changePassword){
+                console.log('cambio la password');
+                model.password = req.body.password;
+            }
+
             model.names = req.body.names;
             model.phone = req.body.phone;
             model.email = req.body.email;
-            model.password = req.body.password;
             model.username = req.body.username;
             model.role = req.body.role;
             model.active = req.body.active ? req.body.active : true;
             model.notificationsEnabled = req.body.notificationsEnabled ? req.body.notificationsEnabled : false;
             model.birthday = req.body.birthday;
-            model.branch = req.body.branch;
-            // model.image = req.file.fieldname;
+            model.branch = AllBranchForThis;
+            model.image = req.file ? req.file.fieldname : model.image;
 
-            const user = await getRepository(UserModel).update({id_user:model.id_user},model);
+            console.log(model);
+
+            const user = await getRepository(UserModel).save(model);
             return responseMessage(resp, 200, true, 'successful update', user);
+            // return responseMessage(resp, 200, true, 'ok');
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');

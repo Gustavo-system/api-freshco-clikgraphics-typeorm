@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne, ManyToMany, JoinTable } from 'typeorm';
 import { AddressModel } from './Address';
 import { BranchModel } from './Branch';
 import { OrdersModel } from './Orders';
@@ -51,13 +51,11 @@ export class UserModel {
     @OneToMany(type => AddressModel, (address) => address.id_user)
     address: AddressModel[];
 
-    @OneToOne(() => BranchModel, {
-        eager: true
-    })
-    @JoinColumn({name:"branch"})
-    branch: BranchModel;
-
     @OneToMany(type => OrdersModel, (order) => order.user)
     orders: OrdersModel[];
+
+    @ManyToMany(type => BranchModel, (branch) => branch.user)
+    @JoinTable({name:'tr_usuario_branch'})
+    branch: BranchModel[];
 
 }

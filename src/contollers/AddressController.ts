@@ -8,7 +8,14 @@ export class AddressController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(AddressModel).find();
+            let model:any = [];
+
+            const { id_user } = req.query;
+            if(id_user){
+                model = await getRepository(AddressModel).find({where:{id_user}});
+            }else{
+                model = await getRepository(AddressModel).find();
+            }
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {

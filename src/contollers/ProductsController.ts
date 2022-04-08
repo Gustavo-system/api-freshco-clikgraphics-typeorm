@@ -9,7 +9,13 @@ export class ProductsController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales"]});
+            let model:any = [];
+            const { id_branch } = req.query;
+            if(id_branch){
+                model = await getRepository(ProductModel).find({where:{branch:id_branch}, relations:["branch", "category", "adicionales"]});
+            }else{
+                model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales"]});
+            }
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);
         } catch (error) {
@@ -24,12 +30,12 @@ export class ProductsController{
             const { adicionales } = req.body;
             let productosAdicionales:any[] = [];
 
-            for (let i = 0; i < adicionales.length; i++) {
-                const elemento = adicionales[i];
-                // console.log(elemento);
-                const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
-                // console.log(adicional);
-                productosAdicionales.push(adicional);
+            if(adicionales > 0){
+                for (let i = 0; i < adicionales.length; i++) {
+                    const elemento = adicionales[i];
+                    const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
+                    productosAdicionales.push(adicional);
+                }
             }
 
             const model = getRepository(ProductModel).create({
@@ -75,6 +81,18 @@ export class ProductsController{
     
             const model = await getRepository(ProductModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
+
+            const { adicionales } = req.body;
+            let productosAdicionales:any[] = [];
+
+            if(adicionales > 0){
+                for (let i = 0; i < adicionales.length; i++) {
+                    const elemento = adicionales[i];
+                    const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
+                    productosAdicionales.push(adicional);
+                }
+            }
+
             model.name = req.body.name;
             model.description = req.body.description;
             model.category = req.body.category;
@@ -88,7 +106,8 @@ export class ProductsController{
             model.popular = (req.body.popular == true || req.body.popular == 1) ? true : false;
             model.new = (req.body.new == true || req.body.new == 1) ? true : false;
             model.vegan = (req.body.vegan == true || req.body.vegan == 1) ? true : false;
-            // model.image = req.file.filename
+            model.adicionales = productosAdicionales
+            model.image = req.file ? req.file.filename : model.image
 
             const product = await getRepository(ProductModel).save(model);
             return responseData(resp, 201, 'successful update', product);

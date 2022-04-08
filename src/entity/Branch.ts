@@ -1,8 +1,9 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { ProductModel } from './Products';
 import { CategoriesModel } from './Categories';
 import { OrdersModel } from './Orders';
 import { AdicionalesModel } from './ProductosAdicionales';
+import { UserModel } from './User';
 
 @Entity({name:"Branch"})
 
@@ -49,5 +50,8 @@ export class BranchModel {
 
     @OneToMany(type => AdicionalesModel, (adicionales) => adicionales.branch)
     adicionales: AdicionalesModel[];
+
+    @ManyToMany(type => UserModel, (user) => user.branch)
+    user: UserModel;
 
 }
