@@ -25,6 +25,7 @@ router.post('/categories', CategoriesController.post);
 router.get('/categories/:id', CategoriesController.getID);
 router.put('/categories/:id', CategoriesController.update);
 router.delete('/categories/:id', CategoriesController.delete);
+router.delete('/categories/disabled/:id', CategoriesController.disabled);
 
 router.get('/address', AddressController.get);
 router.post('/address', AddressController.post);
@@ -39,7 +40,9 @@ router.get('/users', UserController.get);
 router.post('/users', upload.single('image'), UserController.post);
 router.get('/users/:id', UserController.getID);
 router.put('/users/:id', UserController.update);
-router.delete('/user/:id', UserController.delete);
+router.delete('/users/:id', UserController.delete);
+router.delete('/users/disabled/:id', UserController.disabled);
+router.put('/users/password', UserController.changePassword);
 
 router.get('/branchs', BranchController.get);
 router.post('/branchs', upload.single('image'), BranchController.post);
@@ -53,11 +56,14 @@ router.get('/productos_adicionales/:id', AdicionalesController.getID);
 router.put('/productos_adicionales/:id', AdicionalesController.update);
 router.delete('/productos_adicionales/:id', AdicionalesController.delete);
 
+router.delete('/productos_adicionales/disabled/:id', AdicionalesController.disabled);
+
 router.get('/products', ProductsController.get);
-router.post('/products', upload.single('image'), ProductsController.post);
+router.post('/products', upload.single('image'), ProductsController.post); 
 router.get('/products/:id', ProductsController.getID);
 router.put('/products/:id',upload.single('image'),ProductsController.update);
 router.delete('/products/:id', ProductsController.delete);
+router.delete('/products/disabled/:id', ProductsController.disabled);
 
 router.get('/delivery_man', DeliveryManController.get);
 router.post('/delivery_man', DeliveryMan, DeliveryManController.post);

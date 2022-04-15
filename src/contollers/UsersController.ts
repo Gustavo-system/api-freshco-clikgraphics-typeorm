@@ -14,6 +14,7 @@ export class UserController{
             let message:string = "OK"
             const model = await getRepository(UserModel).find({relations:["address", "orders", "branch"]});
             if(model.length == 0) message = 'Empty';
+            model.forEach(u => { delete u.password; delete u.token})
             return responseData(resp, 200, message, model);
         }catch(err){
             console.log(err);
@@ -24,16 +25,16 @@ export class UserController{
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try{
             const customId = uuidv4();
-            const { password, branchs = [] } = req.body;
+            const { password, branch = [] } = req.body;
             let AllBranchForThis:any[] = [];
+  
+            if(branch.length > 0){
 
-            if(branchs.length > 0){
-
-                for (let i = 0; i < branchs.length; i++) {
-                    const id_branch = branchs[i];
+                for (let i = 0; i < branch.length; i++) {
+                    const id_branch = branch[i];
                     console.log(id_branch);
-                    const branch = await getRepository(BranchModel).findOne({where:{id_branch:id_branch}});
-                    AllBranchForThis.push(branch);
+                    const Branch = await getRepository(BranchModel).findOne({where:{id_branch:id_branch}});
+                    AllBranchForThis.push(Branch);
                 }
             }
 
@@ -49,6 +50,7 @@ export class UserController{
                 notificationsEnabled: req.body.notificationsEnabled,
                 birthday: req.body.birthday,
                 uuid: customId,
+                address:[],
                 branch: AllBranchForThis,
                 pendingOrder: req.body.pendingOrder,
                 image: req.file ? req.file.filename : 'sin_imagen.png',
@@ -75,7 +77,7 @@ export class UserController{
 
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try{
-            const model = await getRepository(UserModel).findOne(req.body.id);
+            const model = await getRepository(UserModel).findOne(req.body.id_user);
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
             // const deleteBranchs = await getRepository()
@@ -93,17 +95,10 @@ export class UserController{
                 }
             }
 
-            console.log(AllBranchForThis);
-
-            if(changePassword){
-                console.log('cambio la password');
-                model.password = req.body.password;
-            }
-
             model.names = req.body.names;
             model.phone = req.body.phone;
-            model.email = req.body.email;
-            model.username = req.body.username;
+           // model.email = req.body.email;
+           // model.username = req.body.username;
             model.role = req.body.role;
             model.active = req.body.active ? req.body.active : true;
             model.notificationsEnabled = req.body.notificationsEnabled ? req.body.notificationsEnabled : false;
@@ -114,6 +109,8 @@ export class UserController{
             console.log(model);
 
             const user = await getRepository(UserModel).save(model);
+            delete user.password
+            delete user.token
             return responseMessage(resp, 200, true, 'successful update', user);
             // return responseMessage(resp, 200, true, 'ok');
         }catch(err){
@@ -129,6 +126,33 @@ export class UserController{
 
             await getRepository(UserModel).delete(req.params.id);
             return responseMessage(resp, 201, true, 'was successfully deleted');
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Bad Request');
+        }
+    }
+
+    static disabled = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            const model = await getRepository(UserModel).findOne(req.params.id);
+            if(!model) return responseMessage(resp, 404, false, 'Not Found')
+            model.active=false;
+            await getRepository(UserModel).update(req.params.id,model);
+            return responseMessage(resp, 201, true, 'was successfully deleted');
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Bad Request');
+        }
+    }
+
+    static changePassword = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            const model = await getRepository(UserModel).findOne(req.body.id);
+            if(!model) return responseMessage(resp, 404, false, 'Not Found')
+            const hash_password = await encrypted(req.body.password);
+            model.password=hash_password;
+            await getRepository(UserModel).update(req.body.id,model);
+            return responseMessage(resp, 201, true, 'was successfully updated');
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');

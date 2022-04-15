@@ -130,4 +130,18 @@ export class ProductsController{
         }
     }
 
+
+    static disabled = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            const model = await getRepository(ProductModel).findOne(req.params.id);
+            if(!model) return responseMessage(resp, 404, false, 'Not Found')
+            model.active=false;
+            await getRepository(ProductModel).update(req.params.id,model);
+            return responseMessage(resp, 201, true, 'was successfully deleted');
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Bad Request');
+        }
+    }
+
 }

@@ -46,6 +46,9 @@ export class ProductModel {
     @Column({nullable:true})
     image:string;
 
+    @Column({default:true})
+    active:boolean;
+
     @ManyToOne(type => BranchModel, (branch) => branch.products)
     @JoinColumn({name:'branch'})
     branch: BranchModel;

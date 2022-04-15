@@ -7,6 +7,8 @@ const storage = multer.diskStorage({
         collback(null, 'dist/public/uploads')
     },
     filename: (req, file, collback) =>{
+        console.log(file);
+        
         collback(null, Date.now() + path.extname(file.originalname))
     }
 });

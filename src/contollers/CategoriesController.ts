@@ -80,4 +80,19 @@ export class CategoriesController{
         }
     }
 
+    static disabled = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            const model = await getRepository(CategoriesModel).findOne(req.params.id);
+            if(!model) return responseMessage(resp, 404, false, 'Not Found')
+            model.active=false
+            const categoria = await getRepository(CategoriesModel).save(model);
+            return responseData(resp, 200, 'successful delete', categoria);
+
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Bad Request');
+        }
+    }
+
+
 }

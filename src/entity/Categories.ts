@@ -11,6 +11,8 @@ export class CategoriesModel {
 
     @Column()
     name:string;
+    @Column({default:true})
+    active:boolean;
 
     @OneToMany(type => ProductModel, (product) => product.category)
     products: ProductModel[];

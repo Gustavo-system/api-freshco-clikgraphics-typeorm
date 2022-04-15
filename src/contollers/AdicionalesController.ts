@@ -61,13 +61,13 @@ export class AdicionalesController{
             const model = await getRepository(AdicionalesModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
 
-            const { productos } = req.body;
+            const { products } = req.body;
             let productosAdicionales:any[] = [];
 
-            if(productos.length > 0){
+            if(products.length > 0){
 
-                for (let i = 0; i < productos.length; i++) {
-                    const id_product = productos[i];
+                for (let i = 0; i < products.length; i++) {
+                    const id_product = products[i];
                     const product = await getRepository(ProductModel).findOne({where:{id_product}});
                     productosAdicionales.push(product);
                 }
@@ -97,5 +97,21 @@ export class AdicionalesController{
             return responseMessage(resp, 400, false, 'Bad Request');
         }
     }
+
+
+
+    static disabled = async (req:Request, resp:Response):Promise<Response> => {
+        try {
+            const model = await getRepository(AdicionalesModel).findOne(req.params.id);
+            if(!model) return responseMessage(resp, 404, false, 'Not Found')
+                model.active=false;
+            await getRepository(AdicionalesModel).update(req.params.id,model);
+            return responseMessage(resp, 201, true, 'was successfully deleted');
+        } catch (error) {
+            console.log(error)
+            return responseMessage(resp, 400, false, 'Bad Request');
+        }
+    }
+
 
 }

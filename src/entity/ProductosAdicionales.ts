@@ -15,6 +15,9 @@ export class AdicionalesModel {
     @Column({type:"float"})
     price:number;
 
+    @Column({default:true})
+    active:boolean;
+
     @ManyToMany(type => ProductModel, (product) => product.adicionales)
     products: ProductModel[];
 
