@@ -1,0 +1,24 @@
+{
+    "type": "mysql",
+    "host": "108.61.224.83",
+    "port": 3306,
+    "username": "remoteFRESHCO",
+    "password": "rootFRESHCO",
+    "database": "Strapi_Freshco_v2",
+    "synchronize": true,
+    "logging": false,
+    "entities": [
+       "./dist/entity/**/*.{ts,js}"
+    ],
+    "migrations": [
+       "./dist/migration/**/*.ts"
+    ],
+    "subscribers": [
+       "src/subscriber/**/*.ts"
+    ],
+    "cli": {
+       "entitiesDir": "src/entity",
+       "migrationsDir": "src/migration",
+       "subscribersDir": "src/subscriber"
+    }
+ }

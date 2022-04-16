@@ -65,7 +65,7 @@ export class UserController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try{
-            const model = await getRepository(UserModel).findOne(req.body.id, {relations:["address", "orders", "branch"]});
+            const model = await getRepository(UserModel).findOne(req.params.id, {relations:["address", "orders", "branch"]});
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             model.password = "";
             return responseData(resp, 200, 'Datos obtenidos', model);
@@ -105,8 +105,6 @@ export class UserController{
             model.birthday = req.body.birthday;
             model.branch = AllBranchForThis;
             model.image = req.file ? req.file.fieldname : model.image;
-
-            console.log(model);
 
             const user = await getRepository(UserModel).save(model);
             delete user.password
