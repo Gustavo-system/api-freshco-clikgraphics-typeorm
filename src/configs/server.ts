@@ -4,7 +4,6 @@ import cors = require('cors');
 import morgan = require('morgan');
 import bodyParser = require('body-parser');
 import path = require('path');
-
 dotenv.config();
 
 import router from '../routes/router';

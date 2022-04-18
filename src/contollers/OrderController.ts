@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import { responseMessage, responseData } from '../utils/responses';
 import { OrdersModel } from '../entity/Orders';
 import { generatePymentMethod, generatePaymentIntent } from '../configs/stripe';
+import { AddressModel } from '../entity/Address';
+import { BranchModel } from '../entity/Branch';
 
 export class OrderController{
 
@@ -86,10 +88,11 @@ export class OrderController{
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try {
             const date = new Date();
+  
             const model = getRepository(OrdersModel).create({
                 date:`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
                 products: req.body.products,
-                address: req.body.address,
+                address: await getRepository(AddressModel).findOne(req.body.address),
                 subtotal: req.body.subtotal,
                 total: req.body.total,
                 comentario_branch: req.body.comentario_branch,
@@ -98,7 +101,7 @@ export class OrderController{
                 payment_type: req.body.payment_type,
                 pin: req.body.pin,
                 delivery: req.body.id_delivery,
-                branch: req.body.id_branch,
+                branch: await getRepository(BranchModel).findOne(req.body.address),
             });
             const order = await getRepository(OrdersModel).save(model);
             return responseData(resp, 200, 'Created', order);
@@ -206,7 +209,6 @@ export class OrderController{
 
     static payOrder = async (req:Request, resp:Response) => {
         try {
-            console.log(req.body);
             const id_order = req.params.id;
             const { token } = req.body;
 
@@ -215,12 +217,12 @@ export class OrderController{
             if(!order) return responseMessage(resp, 404, false, 'Order not exist');
 
             if(order.pagado == true) return responseMessage(resp, 406, true, 'Esta orden ya fue pagada');
-
+       
             const responseMethod = await generatePymentMethod(token);
-
+           return
             const responsePaymentIntent = await generatePaymentIntent({
                 amount: order.total,
-                branch: order.branch.name,
+                branch: "Freshco",
                 payment_method: responseMethod.id
             });
 

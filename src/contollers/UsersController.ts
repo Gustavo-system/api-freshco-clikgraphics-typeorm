@@ -81,32 +81,28 @@ export class UserController{
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
             // const deleteBranchs = await getRepository()
+console.log(req.body);
 
-            const { branchs = [], changePassword = false } = req.body;
+            const { branch = [], changePassword = false } = req.body;
             let AllBranchForThis:any[] = [];
 
-            if(branchs.length > 0){
+            if(branch.length > 0){
 
-                for (let i = 0; i < branchs.length; i++) {
-                    const id_branch = branchs[i];
+                for (let i = 0; i < branch.length; i++) {
+                    const id_branch = branch[i];
                     console.log(id_branch);
-                    const branch = await getRepository(BranchModel).findOne({where:{id_branch}});
-                    AllBranchForThis.push(branch);
+                    const branchs = await getRepository(BranchModel).findOne({where:{id_branch}});
+                    console.log(branchs);
+                    
+                    req.body.branch = branchs
+                    console.log(req.body.branch,"branch");
+                    
                 }
             }
 
-            model.names = req.body.names;
-            model.phone = req.body.phone;
-           // model.email = req.body.email;
-           // model.username = req.body.username;
-            model.role = req.body.role;
-            model.active = req.body.active ? req.body.active : true;
-            model.notificationsEnabled = req.body.notificationsEnabled ? req.body.notificationsEnabled : false;
-            model.birthday = req.body.birthday;
-            model.branch = AllBranchForThis;
-            model.image = req.file ? req.file.fieldname : model.image;
+            let result = Object.assign(model,req.body);
 
-            const user = await getRepository(UserModel).save(model);
+            const user = await getRepository(UserModel).save(result);
             delete user.password
             delete user.token
             return responseMessage(resp, 200, true, 'successful update', user);

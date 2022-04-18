@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 import { DeliveryManModel } from './DeliveryMan';
 import { BranchModel } from './Branch';
 import { UserModel } from './User';
@@ -80,10 +80,7 @@ export class OrdersModel {
     @JoinColumn({name:'user'})
     user : UserModel;
 
-    @OneToOne(() => AddressModel, {
-        eager: true
-    })
-    @JoinColumn({name:"address"})
+    @ManyToOne(() => AddressModel)
     address: AddressModel;
 
 }
