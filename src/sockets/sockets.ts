@@ -5,12 +5,13 @@ import { wssUserList } from './listaUsers';
 import { wsUser } from './usuarioSocket';
 import { UserController } from '../contollers/UsersController';
 import * as socketIO from 'socket.io';
+import { Eventos, Salas } from "./eventos.enum";
 export const usuariosConectados = new wssUserList();
 
 
 export const desconectar = (cliente:Socket,io:socketIO.Server ) => {
 
-    cliente.on('disconnect', () => {
+    cliente.on(Eventos.DESCONECTAR, () => {
         usuariosConectados.deleteUser(cliente.id)
         console.log("desconectado");
         io.emit('usuarios-activos', usuariosConectados.getLista() );
@@ -21,25 +22,25 @@ export const desconectar = (cliente:Socket,io:socketIO.Server ) => {
 
 export const salaRestaurant =  (cliente:Socket,io:socketIO.Server ) => {
  console.log(cliente.id);
-    cliente.on('salaRestaurant', async({id}) => {
+    cliente.on(Eventos.CONFIGUSER, async({id}) => {
         let sala = ''
         const  user = await UserController.getUser(id)
 
         if(user.role ==='ADMIN' || user.role === 'COLABORADOR'){
             console.log('conectado a sala de colaborador');
             
-            cliente.join('salaRestaurant-Colaborador')
-            sala= 'salaRestaurant-Colaborador' 
+            cliente.join(Salas.ADMIN)
+            sala= Salas.ADMIN
           }
         else if (user.role =="DELIVERY"){
             console.log('conectado a sala de delivery');
-            cliente.join('salaRestaurant-Delivery')
-            sala= 'salaRestaurant-Delivery'
+            cliente.join(Salas.DELIVERY)
+            sala= Salas.DELIVERY
         }  
           else{
             console.log('conectado a sala de clientes');
-              cliente.join('salaRestaurant-Customer')
-              sala= 'salaRestaurant-Customer'
+              cliente.join(Salas.CUSTOMER)
+              sala= Salas.CUSTOMER
           }
           const wsUser:wsUser ={
             id,

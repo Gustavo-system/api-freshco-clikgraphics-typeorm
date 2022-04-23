@@ -22,7 +22,7 @@ export class UserController{
             let total = []
             for(let i =0; i<model.length; i++){
                 for(let j =0; j<model[i].orders.length; j++){
-                    result = []
+                  
                     let a:orderProduct[] = JSON.parse(JSON.parse(model[i].orders[j].products))
                     let prods = await this.getProductsOrders(a)
                     let orden:any = model[i].orders[j]
@@ -32,6 +32,7 @@ export class UserController{
                 let user = model[i];
                 user.orders = result
                 total.push(user)
+                result = []
             }
             return responseData(resp, 200, message, total);
         }catch(err){
@@ -87,8 +88,9 @@ export class UserController{
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             model.password = "";
                     let result = []
+                    console.log(model.orders);
+                    
                 for(let j =0; j<model.orders.length; j++){
-                    result = []
                     let a:orderProduct[] = JSON.parse(JSON.parse(model.orders[j].products))
                     let prods = await this.getProductsOrders(a)
                     let orden:any = model.orders[j]

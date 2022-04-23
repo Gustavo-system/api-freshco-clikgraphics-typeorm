@@ -9,6 +9,7 @@ import { Server as socketIO } from "socket.io";
 import * as http from 'http'
 import * as socket from '../sockets/sockets'
 import router from '../routes/router';
+import { Eventos } from '../sockets/eventos.enum';
 
 export default class Server{
     public app:express.Application;
@@ -54,7 +55,7 @@ export default class Server{
 
     private escucharSockets(){
 
-          this.io.on('connect', cliente => {
+          this.io.on(Eventos.CONECTAR, cliente => {
             console.log("cliente conectado");
             
            socket.desconectar(cliente,this.io )

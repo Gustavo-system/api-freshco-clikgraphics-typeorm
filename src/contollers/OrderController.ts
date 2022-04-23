@@ -11,13 +11,14 @@ import { UserModel } from '../entity/User';
 import { DeliveryManModel } from '../entity/DeliveryMan';
 import { AdicionalesModel } from '../entity/ProductosAdicionales';
 import { ProductModel } from '../entity/Products';
+import { Eventos, Salas } from '../sockets/eventos.enum';
 
 export class OrderController{
 
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(OrdersModel).find({relations:["branch", "delivery"]});
+            const model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user"]});
             if(model.length == 0) message = 'Empty';
             let result = [];
             for(let i =0; i<model.length; i++){
@@ -150,16 +151,13 @@ export class OrderController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["branch", "delivery"]});
+            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["branch", "delivery","user"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
-            let result = [];    
                 let a:orderProduct[] = JSON.parse(JSON.parse(model.products))
                 let prods = await this.getProductsOrders(a)
                 let orden:any = model
                 orden.products = prods
-                result.push(orden)
-
-            return responseData(resp, 200, 'Datos obtenidos', model);
+            return responseData(resp, 200, 'Datos obtenidos', orden);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -297,7 +295,7 @@ export class OrderController{
             const result = await getRepository(OrdersModel).save(ordenPagada);
             const server = Server.instance;
 
-            server.io.emit("test",result);
+            server.io.in(Salas.ADMIN).emit(Eventos.ORDEN,result);
             return responseData(res, 200, 'Order successfull', {message:'OK'});
         } catch (error) {
             console.log(error);
