@@ -6,6 +6,9 @@ import { responseData, responseMessage } from '../utils/responses';
 import { v4 as uuidv4 } from 'uuid';
 import { encrypted } from "../utils/helpers/helpers";
 import { BranchModel } from '../entity/Branch';
+import { orderProduct } from "./OrderController";
+import { AdicionalesModel } from '../entity/ProductosAdicionales';
+import { ProductModel } from '../entity/Products';
 
 export class UserController{
 
@@ -15,7 +18,22 @@ export class UserController{
             const model = await getRepository(UserModel).find({relations:["address", "orders", "branch"]});
             if(model.length == 0) message = 'Empty';
             model.forEach(u => { delete u.password; delete u.token})
-            return responseData(resp, 200, message, model);
+            let result = [];
+            let total = []
+            for(let i =0; i<model.length; i++){
+                for(let j =0; j<model[i].orders.length; j++){
+                    result = []
+                    let a:orderProduct[] = JSON.parse(JSON.parse(model[i].orders[j].products))
+                    let prods = await this.getProductsOrders(a)
+                    let orden:any = model[i].orders[j]
+                    orden.products = prods
+                    result.push(orden)
+                }
+                let user = model[i];
+                user.orders = result
+                total.push(user)
+            }
+            return responseData(resp, 200, message, total);
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');
@@ -68,10 +86,32 @@ export class UserController{
             const model = await getRepository(UserModel).findOne(req.params.id, {relations:["address", "orders", "branch"]});
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             model.password = "";
-            return responseData(resp, 200, 'Datos obtenidos', model);
+                    let result = []
+                for(let j =0; j<model.orders.length; j++){
+                    result = []
+                    let a:orderProduct[] = JSON.parse(JSON.parse(model.orders[j].products))
+                    let prods = await this.getProductsOrders(a)
+                    let orden:any = model.orders[j]
+                    orden.products = prods
+                   
+                    result.push(orden)
+                }
+                let user = model;
+                user.orders = result
+        
+            return responseData(resp, 200, 'Datos obtenidos', user);
         }catch(err){
             console.log(err);
             return responseMessage(resp, 400, false, 'Bad request');
+        }
+    }
+
+    static getUser = async (id:number):Promise<any> => {
+        try{
+            return await getRepository(UserModel).findOne(id, {relations:["address", "orders", "branch"]});
+         
+        }catch(err){
+            console.log(err);
         }
     }
 
@@ -81,9 +121,7 @@ export class UserController{
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
             // const deleteBranchs = await getRepository()
-console.log(req.body);
-
-            const { branch = [], changePassword = false } = req.body;
+            const { branch = []} = req.body;
             let AllBranchForThis:any[] = [];
 
             if(branch.length > 0){
@@ -92,16 +130,14 @@ console.log(req.body);
                     const id_branch = branch[i];
                     console.log(id_branch);
                     const branchs = await getRepository(BranchModel).findOne({where:{id_branch}});
-                    console.log(branchs);
-                    
-                    req.body.branch = branchs
-                    console.log(req.body.branch,"branch");
-                    
+                   
+                    AllBranchForThis.push(branchs);           
                 }
             }
-
+            req.body.branch = AllBranchForThis 
             let result = Object.assign(model,req.body);
-
+            console.log(req.body);
+            
             const user = await getRepository(UserModel).save(result);
             delete user.password
             delete user.token
@@ -152,5 +188,37 @@ console.log(req.body);
             return responseMessage(resp, 400, false, 'Bad Request');
         }
     }
+
+
+    static getProductsOrders = async (Array: orderProduct[]) => {
+
+        let result:any[] = [];
+        for(let i =0 ; i < Array.length; i++){
+            if(Array[i].isAdicional){
+                let idProduct = await getRepository(AdicionalesModel).findOne(Array[i].idProduct)
+                 let res = {
+                     cantidad:Array[i].cantidad,
+                     idProduct,
+                     isAdicional:Array[i].isAdicional
+                 }
+                 result.push( res)
+             }else{
+                 let idProduct = await getRepository(ProductModel).findOne(Array[i].idProduct)           
+                let res = {
+                     cantidad:Array[i].cantidad,
+                     idProduct,
+                     isAdicional:Array[i].isAdicional
+                 }
+                 result.push(res)
+               
+             }
+
+
+        }
+    
+        
+       return  result
+    }
+
 
 }

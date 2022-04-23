@@ -12,6 +12,8 @@ export const generatePymentMethod = async (token:string) => {
 }
 
 export const generatePaymentIntent = async ({amount, payment_method, branch}) => {
+    console.log(amount * 100);
+    
     const respPaymentIntent = await stripe.paymentIntents.create({
         amount: parseFloat(amount) * 100,
         currency: 'MXN',

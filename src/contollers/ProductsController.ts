@@ -3,6 +3,8 @@ import { responseMessage, responseData } from '../utils/responses';
 import { getRepository } from 'typeorm';
 import { ProductModel } from '../entity/Products';
 import { AdicionalesModel } from '../entity/ProductosAdicionales';
+import { BranchModel } from '../entity/Branch';
+import { CategoriesModel } from '../entity/Categories';
 
 export class ProductsController{
 
@@ -30,21 +32,22 @@ export class ProductsController{
             const { adicionales } = req.body;
             let productosAdicionales:any[] = [];
 
-            if(adicionales > 0){
+            if(adicionales.length > 0){
                 for (let i = 0; i < adicionales.length; i++) {
                     const elemento = adicionales[i];
                     const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
                     productosAdicionales.push(adicional);
                 }
             }
-
+         
+            
             const model = getRepository(ProductModel).create({
                 name: req.body.name,
                 description: req.body.description,
                 price: req.body.price,
                 discount: req.body.discount,
-                category: req.body.category,
-                branch: req.body.branch,
+                category:await getRepository(CategoriesModel).findOne(req.body.category),
+                branch: await getRepository(BranchModel).findOne(req.body.branch),
                 sizes: req.body.sizes,
                 maximumQuantity: req.body.maximumQuantity,
                 recommended: (req.body.recommended == true || req.body.recommended == 1 ) ? true : false,
@@ -85,18 +88,20 @@ export class ProductsController{
             const { adicionales } = req.body;
             let productosAdicionales:any[] = [];
 
-            if(adicionales > 0){
+            if(adicionales.length > 0){
+   
                 for (let i = 0; i < adicionales.length; i++) {
                     const elemento = adicionales[i];
+                    console.log(elemento);
+                    
                     const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
                     productosAdicionales.push(adicional);
                 }
             }
-
+       
             model.name = req.body.name;
             model.description = req.body.description;
-            model.category = req.body.category;
-            model.branch = req.body.branch;
+            model.category = await getRepository(CategoriesModel).findOne(req.body.category),
             model.price = req.body.price;
             model.discount = req.body.discount;
             model.sizes = req.body.sizes;

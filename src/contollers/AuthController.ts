@@ -11,9 +11,8 @@ class AuthController{
 
         const { email, password, username } = req.body;
 
-        console.log(email, password, username)
 
-        if((email == undefined && password == undefined) && (username == undefined && password == undefined)){
+        if((email == undefined && password == undefined) || (username == undefined && password == undefined)){
             return responseMessage(resp, 400, false, 'Se requieren credeciales');
         }
 

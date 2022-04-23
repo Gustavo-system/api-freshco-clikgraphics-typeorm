@@ -77,7 +77,6 @@ export class OrdersModel {
     delivery : DeliveryManModel;
 
     @ManyToOne(type => UserModel, (user) => user.id_user)
-    @JoinColumn({name:'user'})
     user : UserModel;
 
     @ManyToOne(() => AddressModel)

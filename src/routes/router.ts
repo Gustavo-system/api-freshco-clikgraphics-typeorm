@@ -79,6 +79,7 @@ router.get('/orders_delivery', OrderController.get_orden_delivery);
 router.post('/orders', OrderController.post);
 router.get('/orders/:id', OrderController.getID);
 router.put('/orders/:id', OrderController.update);
+router.put('/orders/confirm/:id', OrderController.confirmOrder);
 router.delete('/orders/:id', OrderController.delete);
 
 /**

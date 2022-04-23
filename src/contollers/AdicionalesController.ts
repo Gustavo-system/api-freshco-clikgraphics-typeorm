@@ -73,8 +73,8 @@ export class AdicionalesController{
                 }
             }
 
-            model.name = req.body.name;
-            model.price = req.body.price;
+            model.name = req.body.name ?? model.name;
+            model.price = req.body.price ?? model.price;
             model.products = productosAdicionales;
 
             const adicional = await getRepository(AdicionalesModel).save(model);

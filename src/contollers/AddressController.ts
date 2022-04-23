@@ -56,9 +56,9 @@ export class AddressController{
             const model = await getRepository(AddressModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
-            model.address = req.body.address,
-            model.latitud = req.body.latitud,
-            model.longitud = req.body.longitud,
+            model.address = req.body.address ??  model.address,
+            model.address = req.body.latitud ??  model.address,
+            model.longitud = req.body.longitud ?? model.longitud,
 
             await getRepository(AddressModel).save(model);
             return responseMessage(resp, 201, true, 'successful update');
