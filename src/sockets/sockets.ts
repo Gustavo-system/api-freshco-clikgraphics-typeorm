@@ -54,3 +54,43 @@ export const salaRestaurant =  (cliente:Socket,io:socketIO.Server ) => {
    
 }
 
+
+export const delivery = (cliente:Socket,io:socketIO.Server ) =>{
+  cliente.on(Eventos.DELIVERY, async(payload) => {
+
+    if(payload.to === undefined || payload.to === null){
+      io.in(Salas.DELIVERY).emit(payload)
+    }else{
+      let user = usuariosConectados.getUser(payload.to)
+      io.in(user.wsId).emit(payload)
+    }
+
+  })
+
+}
+
+export const customer = (cliente:Socket,io:socketIO.Server ) =>{
+  cliente.on(Eventos.CUSTOMER, async(payload) => {
+    if(payload.to === undefined || payload.to === null){
+      io.in(Salas.CUSTOMER).emit(payload)
+    }else{
+      let user = usuariosConectados.getUser(payload.to)
+      io.in(user.wsId).emit(payload)
+    }
+  })
+  
+}
+
+
+export const admin = (cliente:Socket,io:socketIO.Server ) =>{
+  cliente.on(Eventos.ADMIN, async(payload) => {
+    if(payload.to === undefined || payload.to === null){
+      io.in(Salas.ADMIN).emit(payload)
+    }else{
+      let user = usuariosConectados.getUser(payload.to)
+      io.in(user.wsId).emit(payload)
+    }
+  })
+  
+}
+

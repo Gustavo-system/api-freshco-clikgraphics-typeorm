@@ -1,6 +1,6 @@
 export enum Eventos {
 
-    ORDEN="Orden", //Envia Info al Admin
+    ADMIN="A", //Envia Info al Admin
     CUSTOMER = "Customer", // Envia info al customer
     DELIVERY = "Delivery", // Envia info al Delivery
     UBICACION = "Ubicacion", // Envia coordenadas 

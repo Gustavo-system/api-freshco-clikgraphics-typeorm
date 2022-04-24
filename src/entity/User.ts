@@ -48,6 +48,9 @@ export class UserModel {
     @Column({nullable:true})
     uuid:string;
 
+    @Column({default:0})
+    wallet:number;
+      
     @OneToMany(type => AddressModel, (address) => address.id_user)
     address: AddressModel[];
 

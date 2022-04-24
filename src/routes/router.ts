@@ -13,6 +13,7 @@ import AuthController from "../contollers/AuthController";
 import upload from "../configs/libs/multer/multer";
 // import multer from "../configs/libs/multer/multer";
 import { AdicionalesController } from '../contollers/AdicionalesController';
+import { CuponesController } from "../contollers/CuponesController";
 
 const router = Router();
 
@@ -81,6 +82,12 @@ router.get('/orders/:id', OrderController.getID);
 router.put('/orders/:id', OrderController.update);
 router.put('/orders/confirm/:id', OrderController.confirmOrder);
 router.delete('/orders/:id', OrderController.delete);
+
+router.post('/coupons', CuponesController.create);
+router.get('/coupons/', CuponesController.get);
+router.put('/coupons/:id', CuponesController.update);
+router.get('/coupons/:name/:idUser', CuponesController.getName);
+router.delete('/coupons/:id', CuponesController.desactive);
 
 /**
  * Ruta para realizar pagos

@@ -91,7 +91,7 @@ export class UserController{
                     console.log(model.orders);
                     
                 for(let j =0; j<model.orders.length; j++){
-                    let a:orderProduct[] = JSON.parse(JSON.parse(model.orders[j].products))
+                    let a:orderProduct[] = JSON.parse(JSON.parse(model.orders[j].products)) ?? []
                     let prods = await this.getProductsOrders(a)
                     let orden:any = model.orders[j]
                     orden.products = prods
@@ -197,7 +197,7 @@ export class UserController{
         let result:any[] = [];
         for(let i =0 ; i < Array.length; i++){
             if(Array[i].isAdicional){
-                let idProduct = await getRepository(AdicionalesModel).findOne(Array[i].idProduct)
+                let idProduct = await getRepository(AdicionalesModel).findOne(Array[i].idProduct,{relations:["cupon"]})
                  let res = {
                      cantidad:Array[i].cantidad,
                      idProduct,

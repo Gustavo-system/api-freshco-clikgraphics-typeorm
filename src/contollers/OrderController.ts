@@ -12,17 +12,18 @@ import { DeliveryManModel } from '../entity/DeliveryMan';
 import { AdicionalesModel } from '../entity/ProductosAdicionales';
 import { ProductModel } from '../entity/Products';
 import { Eventos, Salas } from '../sockets/eventos.enum';
+import { CuponesModel } from '../entity/Cupones';
 
 export class OrderController{
 
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user"]});
+            const model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user","cupon"]});
             if(model.length == 0) message = 'Empty';
             let result = [];
             for(let i =0; i<model.length; i++){
-                let a:orderProduct[] = JSON.parse(JSON.parse(model[i].products))
+                let a:orderProduct[] = JSON.parse(JSON.parse(model[i].products)) ?? []
                 let prods = await this.getProductsOrders(a)
                 let orden:any = model[i]
                 orden.products = prods
@@ -140,6 +141,7 @@ export class OrderController{
                 delivery: req.body.id_delivery,
                 branch: await getRepository(BranchModel).findOne(req.body.address),
                 user: await getRepository(UserModel).findOne(req.body.user),
+                cupon: await getRepository(CuponesModel).findOne(req.body.cupon)
             });
             const order = await getRepository(OrdersModel).save(model);
             return responseData(resp, 200, 'Created', order);
@@ -151,9 +153,9 @@ export class OrderController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["branch", "delivery","user"]});
+            const model = await getRepository(OrdersModel).findOne(req.params.id, {relations:["branch", "delivery","user","cupon"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
-                let a:orderProduct[] = JSON.parse(JSON.parse(model.products))
+                let a:orderProduct[] = JSON.parse(JSON.parse(model.products)) ?? []
                 let prods = await this.getProductsOrders(a)
                 let orden:any = model
                 orden.products = prods
@@ -295,7 +297,7 @@ export class OrderController{
             const result = await getRepository(OrdersModel).save(ordenPagada);
             const server = Server.instance;
 
-            server.io.in(Salas.ADMIN).emit(Eventos.ORDEN,result);
+            server.io.in(Salas.ADMIN).emit(Eventos.ADMIN,result);
             return responseData(res, 200, 'Order successfull', {message:'OK'});
         } catch (error) {
             console.log(error);

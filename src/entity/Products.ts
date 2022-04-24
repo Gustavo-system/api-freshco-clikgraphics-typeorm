@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { BranchModel } from './Branch';
 import { CategoriesModel } from './Categories';
+import { CuponesModel } from './Cupones';
 import { AdicionalesModel } from './ProductosAdicionales';
 
 @Entity({name:"Products"})
@@ -61,4 +62,7 @@ export class ProductModel {
     @JoinTable({name:'tr_adicionales'})
     adicionales: AdicionalesModel[];
 
+    @ManyToMany(type => CuponesModel, (cupon) => cupon.products)
+    @JoinTable()
+    cupon:CuponesModel
 }

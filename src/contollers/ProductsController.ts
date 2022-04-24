@@ -14,9 +14,9 @@ export class ProductsController{
             let model:any = [];
             const { id_branch } = req.query;
             if(id_branch){
-                model = await getRepository(ProductModel).find({where:{branch:id_branch}, relations:["branch", "category", "adicionales"]});
+                model = await getRepository(ProductModel).find({where:{branch:id_branch}, relations:["branch", "category", "adicionales","cupon"]});
             }else{
-                model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales"]});
+                model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales","cupon"]});
             }
             if(model.length == 0) message = 'Empty';
             return responseData(resp, 200, message, model);

@@ -3,6 +3,7 @@ import { DeliveryManModel } from './DeliveryMan';
 import { BranchModel } from './Branch';
 import { UserModel } from './User';
 import { AddressModel } from './Address';
+import { CuponesModel } from './Cupones';
 
 @Entity({name:"Orders"})
 
@@ -81,5 +82,9 @@ export class OrdersModel {
 
     @ManyToOne(() => AddressModel)
     address: AddressModel;
+
+    @OneToOne(() => CuponesModel)
+    @JoinColumn()
+    cupon: CuponesModel;
 
 }
