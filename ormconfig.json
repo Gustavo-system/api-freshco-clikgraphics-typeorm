@@ -4,7 +4,7 @@
     "port": 3306,
     "username": "remoteFRESHCO",
     "password": "rootFRESHCO",
-    "database": "Strapi_Freshco_v2",
+    "database": "Strapi_Freshco_test_v1",
     "synchronize": true,
     "logging": false,
     "entities": [

@@ -32,5 +32,6 @@ export class DeliveryManModel {
 
     @OneToMany(type => OrdersModel, (order) => order.delivery)
     orders: OrdersModel[];
-
+    @Column({default:true})
+    active:boolean;
 }

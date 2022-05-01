@@ -18,7 +18,6 @@ export class CategoriesModel {
     products: ProductModel[];
 
     @ManyToOne(type => BranchModel, (branch) => branch.categories)
-    @JoinColumn({name:'id_branch'})
     id_branch: BranchModel;
-
+    
 }

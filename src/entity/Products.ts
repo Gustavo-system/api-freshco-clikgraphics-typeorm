@@ -21,13 +21,7 @@ export class ProductModel {
     price:number;
 
     @Column({nullable:true})
-    discount:string;
-
-    @Column({nullable:true})
-    sizes:string;
-
-    @Column({nullable:true})
-    maximumQuantity:string;
+    maximumQuantity:number;
 
     @Column({nullable:true, default:false})
     recommended:boolean;
@@ -51,15 +45,15 @@ export class ProductModel {
     active:boolean;
 
     @ManyToOne(type => BranchModel, (branch) => branch.products)
-    @JoinColumn({name:'branch'})
+    @JoinTable()
     branch: BranchModel;
 
     @ManyToOne(type => CategoriesModel, (category) => category.products)
-    @JoinColumn({name:'category'})
+    @JoinTable()
     category: CategoriesModel;
 
     @ManyToMany(type => AdicionalesModel, (adicionales) => adicionales.products)
-    @JoinTable({name:'tr_adicionales'})
+    @JoinTable()
     adicionales: AdicionalesModel[];
 
     @ManyToMany(type => CuponesModel, (cupon) => cupon.products)

@@ -17,6 +17,7 @@ export class AddressController{
                 model = await getRepository(AddressModel).find();
             }
             if(model.length == 0) message = 'Empty';
+            model = model.filter( m => m.active === true)
             return responseData(resp, 200, message, model);
         } catch (error) {
             console.log(error)
@@ -33,7 +34,7 @@ export class AddressController{
                 id_user: req.body.id_user
             });
             await getRepository(AddressModel).save(model);
-            return responseMessage(resp, 201, true, 'Created');
+            return responseData(resp, 201, 'Created',model);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');

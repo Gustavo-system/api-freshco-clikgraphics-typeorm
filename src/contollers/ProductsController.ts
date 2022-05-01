@@ -19,6 +19,7 @@ export class ProductsController{
                 model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales","cupon"]});
             }
             if(model.length == 0) message = 'Empty';
+            model = model.filter( m => m.active === true)
             return responseData(resp, 200, message, model);
         } catch (error) {
             console.log(error)
@@ -45,10 +46,8 @@ export class ProductsController{
                 name: req.body.name,
                 description: req.body.description,
                 price: req.body.price,
-                discount: req.body.discount,
                 category:await getRepository(CategoriesModel).findOne(req.body.category),
                 branch: await getRepository(BranchModel).findOne(req.body.branch),
-                sizes: req.body.sizes,
                 maximumQuantity: req.body.maximumQuantity,
                 recommended: (req.body.recommended == true || req.body.recommended == 1 ) ? true : false,
                 promotion: (req.body.promotion == true || req.body.promotion == 1) ? true : false,
@@ -56,15 +55,17 @@ export class ProductsController{
                 new: (req.body.new == true || req.body.new == 1) ? true : false,
                 vegan: (req.body.vegan == true || req.body.vegan == 1) ? true : false,
                 image: req.file ? req.file.filename : 'sin_imagen.png',
-                adicionales: productosAdicionales
+                adicionales: productosAdicionales,
             });
-
+            
             // return resp.json(model);
             const product = await getRepository(ProductModel).save(model);
+            let prod:any= product
+            prod['cupon']=[]
             return responseData(resp, 200, 'Created', product);
         } catch (error) {
             console.log(error)
-            return responseMessage(resp, 400, false, 'Bad Request');
+            return responseMessage(resp, 500, false, 'Bad Request');
         }
     }
 
@@ -82,7 +83,7 @@ export class ProductsController{
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
     
-            const model = await getRepository(ProductModel).findOne(req.params.id);
+            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales","cupon"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
             const { adicionales } = req.body;
@@ -92,8 +93,6 @@ export class ProductsController{
    
                 for (let i = 0; i < adicionales.length; i++) {
                     const elemento = adicionales[i];
-                    console.log(elemento);
-                    
                     const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
                     productosAdicionales.push(adicional);
                 }
@@ -103,8 +102,6 @@ export class ProductsController{
             model.description = req.body.description;
             model.category = await getRepository(CategoriesModel).findOne(req.body.category),
             model.price = req.body.price;
-            model.discount = req.body.discount;
-            model.sizes = req.body.sizes;
             model.maximumQuantity = req.body.maximumQuantity;
             model.recommended = (req.body.recommended == true || req.body.recommended == 1) ? true : false;
             model.promotion = (req.body.promotion == true || req.body.promotion == 1) ? true : false;

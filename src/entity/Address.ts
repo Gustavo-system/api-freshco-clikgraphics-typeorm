@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { UserModel } from './User';
+import { OrdersModel } from './Orders';
 
 @Entity({name:"Address"})
 
@@ -21,4 +22,8 @@ export class AddressModel {
     @JoinColumn({name:'id_user'})
     id_user: UserModel;
 
+    @OneToMany( () => OrdersModel, order => order.address)
+    orders:OrdersModel[]
+    @Column({default:true})
+    active:boolean;
 }

@@ -22,7 +22,8 @@ export class AdicionalesModel {
     products: ProductModel[];
 
     @ManyToOne(type => BranchModel, (branch) => branch.adicionales)
-    @JoinColumn({name:'branch'})
     branch: BranchModel;
 
+
+    
 }

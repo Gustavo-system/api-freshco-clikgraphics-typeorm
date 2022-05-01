@@ -16,7 +16,7 @@ export const generatePaymentIntent = async ({amount, payment_method, branch}) =>
     
     const respPaymentIntent = await stripe.paymentIntents.create({
         amount: parseFloat(amount) * 100,
-        currency: 'MXN',
+        currency: 'USD',
         payment_method_types: ['card'],
         payment_method,
         description: `Para la sucursal - ${branch}`

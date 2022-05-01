@@ -5,6 +5,7 @@ import { OrdersModel } from "../entity/Orders";
 import { ProductModel } from "../entity/Products";
 import { UserModel } from "../entity/User";
 import { responseData, responseMessage } from "../utils/responses";
+import { BranchModel } from '../entity/Branch';
 
 
 
@@ -13,13 +14,16 @@ export class CuponesController{
     static get = async (req:Request,res:Response) => {
 
         try {
-            let cupones = []
+            let date = new Date() 
+            let dat = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+            let cupones:CuponesModel[] = []
             let message ="OK"
-            cupones =  await getRepository(CuponesModel).find({relations:["products"]})
+            cupones =  await getRepository(CuponesModel).find({relations:["products","branch"]})
              if(cupones.length == 0) {
                 message = 'Empty';
                 return responseData(res, 400, message, []);
              }
+             cupones = cupones.filter( m => m.active === true || new Date(m.date).getTime()  > new Date(dat).getTime() )
              return responseData(res, 200, message, cupones);
         } catch (error) {
             return responseMessage(res, 500, false, 'Internal Server Error');
@@ -28,7 +32,7 @@ export class CuponesController{
     }
     static create = async (req:Request,res:Response) => {
         try {
-            let {date,description,name,products ,allProducts,discount,percentage} = req.body
+            let {date,description,name,products ,allProducts,discount,percentage,branch} = req.body
             let result = []
             
             if(products.length > 0){
@@ -47,7 +51,8 @@ export class CuponesController{
                 products,
                 allProducts,
                 discount,
-                percentage
+                percentage,
+                branch : await getRepository(BranchModel).findOne(branch)
             })
             let coupon= await getRepository(CuponesModel).save(model)
             return responseData(res, 200, 'Created', coupon);
@@ -64,7 +69,7 @@ export class CuponesController{
     static getId = async (req:Request,res:Response) => {
         try {
             let message ="OK"
-            let cupon =  await getRepository(CuponesModel).findOne(req.params.id,{relations:["products"]})
+            let cupon =  await getRepository(CuponesModel).findOne(req.params.id,{relations:["products","branch"]})
             if(!cupon) message = "not Found"
             return responseData(res, 200, message, cupon);
         } catch (error) {
@@ -80,9 +85,15 @@ export class CuponesController{
             let message ="OK"
             let name = req.params.name.toLowerCase().replace(/ /g, "")
             let user = await getRepository(UserModel).findOne(req.params.idUser, {relations:["orders"]});
-            let cupon =  await getRepository(CuponesModel).findOne({name},{relations:["products"],where:{active:true}})
+            let cupon =  await getRepository(CuponesModel).findOne({name},{relations:["products"],where:{active:true}}) 
             let count =0;
+            
+            if(!user){   return responseMessage(res, 404, false, 'User not found');}
+            if(!cupon) {return responseMessage(res, 404, false, 'Coupon not found'); }
             user.orders = await this.getOrders(user.orders);
+            if(user.orders.length < 0){
+                return responseData(res, 200, message, cupon);
+            }
             for(let i =0 ; i<user.orders.length; i++){
                 if(  user.orders[i].cupon?.id_coupon === cupon.id_coupon){
                     count++;

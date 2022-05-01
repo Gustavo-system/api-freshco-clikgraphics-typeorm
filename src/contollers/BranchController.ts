@@ -37,6 +37,7 @@ export class BranchController{
                 branchs.products = products;
                 total.push(branchs)
             }
+            total = total.filter( m => m.online === true)
             return responseData(resp, 200, message, total);
         } catch (error) {
             console.log(error)
@@ -53,9 +54,10 @@ export class BranchController{
                 minimumCost: req.body.minimumCost,
                 deliveryType: req.body.deliveryType,
                 paymentMethod: req.body.paymentMethod,
-                online: (req.body.online == true || req.body.online == 1) ? true : false ,
+                online: true,
                 rate: req.body.rate,
                 image: req.file ? req.file.filename : "sin_imagen.png",
+
             });
             const branch = await getRepository(BranchModel).save(model);
             return responseData(resp, 201, 'Created', branch);
@@ -77,7 +79,6 @@ export class BranchController{
                 let prods = await this.getProductsOrders(a)
                 let orden:any = model.orders[j]
                 orden.products = prods
-               
                 result.push(orden)
             }
             for(let j = 0 ; j<model.products.length; j++){

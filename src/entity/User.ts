@@ -21,9 +21,6 @@ export class UserModel {
     @Column()
     password:string
 
-    @Column({unique:true})
-    username:string
-
     @Column({unique:false, nullable:true})
     token:string
 

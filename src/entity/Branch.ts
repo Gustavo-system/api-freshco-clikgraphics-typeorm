@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable, JoinColumn, OneToOne } from 'typeorm';
 import { ProductModel } from './Products';
 import { CategoriesModel } from './Categories';
 import { OrdersModel } from './Orders';
 import { AdicionalesModel } from './ProductosAdicionales';
 import { UserModel } from './User';
+import { AddressModel } from './Address';
 
 @Entity({name:"Branch"})
 
@@ -38,6 +39,9 @@ export class BranchModel {
 
     @Column({nullable:true})
     image:string;
+
+    @Column({default:true})
+    active:boolean;
 
     @OneToMany(type => ProductModel, (products) => products.branch)
     products: ProductModel[];

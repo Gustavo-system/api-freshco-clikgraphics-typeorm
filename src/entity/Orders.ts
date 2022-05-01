@@ -27,6 +27,9 @@ export class OrdersModel {
     @Column({type:"float"})
     total:number;
 
+    @Column({type:"float",default:0})
+    moneyUsed:number;
+
     @Column({type:"text"})
     comentario_branch:string;
 
@@ -61,7 +64,7 @@ export class OrdersModel {
     payment_type:boolean
 
     @Column({type:"boolean", default:false, nullable:true})
-    delivery_assigbed:boolean
+    delivery_assigned:boolean
 
     @Column({type:"varchar", length:50})
     pin:string
@@ -70,21 +73,19 @@ export class OrdersModel {
     verified_pin:boolean
 
     @ManyToOne(type => BranchModel, (branch) => branch.orders)
-    @JoinColumn({name:'branch'})
     branch: BranchModel;
 
     @ManyToOne(type => DeliveryManModel, (delivery) => delivery.orders)
-    @JoinColumn({name:'delivery'})
     delivery : DeliveryManModel;
 
     @ManyToOne(type => UserModel, (user) => user.id_user)
     user : UserModel;
 
-    @ManyToOne(() => AddressModel)
+    @ManyToOne(() => AddressModel, address => address.orders)
     address: AddressModel;
 
-    @OneToOne(() => CuponesModel)
-    @JoinColumn()
+    @ManyToOne(() => CuponesModel, cupon => cupon.orders)
     cupon: CuponesModel;
-
+    @Column({default:true})
+    active:boolean;
 }

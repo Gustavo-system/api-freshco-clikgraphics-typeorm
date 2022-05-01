@@ -24,8 +24,8 @@ export const salaRestaurant =  (cliente:Socket,io:socketIO.Server ) => {
  console.log(cliente.id);
     cliente.on(Eventos.CONFIGUSER, async({id}) => {
         let sala = ''
-        const  user = await UserController.getUser(id)
-
+        const  user:Partial<UserModel> = await UserController.getUser(id)
+        console.log(id);
         if(user.role ==='ADMIN' || user.role === 'COLABORADOR'){
             console.log('conectado a sala de colaborador');
             

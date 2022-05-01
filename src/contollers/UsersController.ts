@@ -34,6 +34,7 @@ export class UserController{
                 total.push(user)
                 result = []
             }
+            total = total.filter( m => m.active === true)
             return responseData(resp, 200, message, total);
         }catch(err){
             console.log(err);
@@ -46,13 +47,14 @@ export class UserController{
             const customId = uuidv4();
             const { password, branch = [] } = req.body;
             let AllBranchForThis:any[] = [];
-  
+               
+                
             if(branch.length > 0){
 
                 for (let i = 0; i < branch.length; i++) {
                     const id_branch = branch[i];
                     console.log(id_branch);
-                    const Branch = await getRepository(BranchModel).findOne({where:{id_branch:id_branch}});
+                    const Branch = await getRepository(BranchModel).findOne({where:{id_branch}});
                     AllBranchForThis.push(Branch);
                 }
             }
@@ -63,22 +65,27 @@ export class UserController{
                 phone: req.body.phone,
                 email: req.body.email,
                 password: hash_password,
-                username: req.body.username,
                 role: req.body.role,
                 active: req.body.active,
                 notificationsEnabled: req.body.notificationsEnabled,
                 birthday: req.body.birthday,
                 uuid: customId,
-                address:[],
+                address:[] ,
                 branch: AllBranchForThis,
                 pendingOrder: req.body.pendingOrder,
                 image: req.file ? req.file.filename : 'sin_imagen.png',
+                orders:[]
             });
             const user = await getRepository(UserModel).save(model);
+            delete user.password
+            delete user.token
             return responseData(resp, 200, 'Datos obtenidos', user);
         }catch(err){
             console.log(err);
-            return responseMessage(resp, 400, false, 'Bad request');
+            if(err.code === 'ER_DUP_ENTRY'){
+                return responseMessage(resp, 400, false,'email was used in other account ');
+            }
+            return responseMessage(resp, 500, false, 'Bad request');
         }
     }
 

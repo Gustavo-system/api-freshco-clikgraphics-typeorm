@@ -3,14 +3,25 @@ import { responseMessage, responseData } from '../utils/responses';
 import { getRepository } from 'typeorm';
 import { AdicionalesModel } from '../entity/ProductosAdicionales';
 import { ProductModel } from '../entity/Products';
+import { BranchModel } from '../entity/Branch';
 
 export class AdicionalesController{
 
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const model = await getRepository(AdicionalesModel).find({relations:["products", "branch"]});
+            const { branch } = req.query;
+            let model = await getRepository(AdicionalesModel).find({ where:{branch},relations:["products", "branch"]});
+            if(branch){
+
+                model = await getRepository(AdicionalesModel).find({ where:{branch} ,relations:["products", "branch"]});
+ 
+            }else{
+                model = await getRepository(AdicionalesModel).find({relations:["branch", "products"]});
+            }
+
             if(model.length == 0) message = 'Empty';
+            model = model.filter( m => m.active === true)
             return responseData(resp, 200, message, model);
         } catch (error) {
             console.log(error)
@@ -23,12 +34,14 @@ export class AdicionalesController{
 
             const { productos } = req.body;
             let productosAdicionales:any[] = [];
-
-            for (let i = 0; i < productos.length; i++) {
-                const elemento = productos[i];
-                const producto = await getRepository(ProductModel).findOne({where:{id_product:elemento}});
-                productosAdicionales.push(producto);
+            if(productos){
+                for (let i = 0; i < productos.length; i++) {
+                    const elemento = productos[i];
+                    const producto = await getRepository(ProductModel).findOne({where:{id_product:elemento}});
+                    productosAdicionales.push(producto);
+                }
             }
+          
 
             const model = getRepository(AdicionalesModel).create({
                 name: req.body.name,
@@ -64,7 +77,7 @@ export class AdicionalesController{
             const { products } = req.body;
             let productosAdicionales:any[] = [];
 
-            if(products.length > 0){
+            if(products > 0 && products.length>0){
 
                 for (let i = 0; i < products.length; i++) {
                     const id_product = products[i];
@@ -75,7 +88,14 @@ export class AdicionalesController{
 
             model.name = req.body.name ?? model.name;
             model.price = req.body.price ?? model.price;
-            model.products = productosAdicionales;
+                if(products){
+                    model.products = productosAdicionales;
+                }
+
+
+            if(req.body.branch){
+                model.branch = await getRepository(BranchModel).findOne(req.body.branch)
+            }
 
             const adicional = await getRepository(AdicionalesModel).save(model);
             return responseData(resp, 201, 'successful update', adicional);

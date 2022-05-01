@@ -2,13 +2,15 @@ import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { DeliveryManModel } from '../entity/DeliveryMan';
 import { responseData, responseMessage } from '../utils/responses';
+import { UserModel } from '../entity/User';
 
 export class DeliveryManController{
     static get = async (req:Request, resp:Response):Promise<Response> => {
         try{
             let message:string = "OK"
-            const model = await getRepository(DeliveryManModel).find({relations:["orders"]});
+            let model = await getRepository(DeliveryManModel).find({relations:["orders"]});
             if(model.length == 0) message = 'Empty';
+            model = model.filter( m => m.active === true)
             return responseData(resp, 200, message, model);
         }catch(err){
             console.log(err);
@@ -24,7 +26,7 @@ export class DeliveryManController{
                 phone: req.body.phone,
                 photo_seguro : req.files['photo_seguro'] ? req.files['photo_seguro'][0].filename : 'sin_imagen.png',
                 photo_licencia : req.files['photo_licencia'] ? req.files['photo_licencia'][0].filename : 'sin_imagen.png',
-                id_user: req.body.id_user
+                id_user: await getRepository(UserModel).findOne(req.body.id_user) ?? null
             });
             const delivery = await getRepository(DeliveryManModel).save(model);
             return responseData(resp, 201, 'Created', delivery);
