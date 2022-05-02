@@ -213,8 +213,7 @@ export class OrderController{
                      return responseData(resp, 200, message,model);
                 }
 
-            
-             
+
                 return responseData(resp, 200, message,model);
         } catch (error) {
             console.log(error)
@@ -238,10 +237,9 @@ export class OrderController{
 
     static payOrder = async (req:Request, resp:Response) => {
         try {
-            const id_order = req.params.id;
             const { token } = req.body;
 
-            const order = await getRepository(OrdersModel).findOne({where:{id_order}});
+            const order = await getRepository(OrdersModel).findOne(req.params.id,{relations:["address", "orders", "branch"]});
             if(!order) return responseMessage(resp, 404, false, 'Order not exist');
 
             if(order.pagado == true) return responseMessage(resp, 406, true, 'Esta orden ya fue pagada');
@@ -254,7 +252,7 @@ export class OrderController{
                 payment_method: responseMethod.id
             });
 
-            return responseData(resp, 200, 'Orden pagada con exito', {pago:responsePaymentIntent,id_order});
+            return responseData(resp, 200, 'Orden pagada con exito', {pago:responsePaymentIntent,id_order:req.params.id});
         } catch (error) {
             console.log(error);
             return responseMessage(resp, 400, false, 'Error al procesar pago');
