@@ -299,7 +299,13 @@ export class OrderController{
             let nOrder:any = result;
             nOrder.products = prods;
             const server = Server.instance;
-            server.io.in(Salas.ADMIN).emit(Eventos.ADMIN,nOrder);
+            let emits = usuariosConectados.findAdminsByBranch(order.branch.id_branch);
+            if(emits.length > 0)  {
+                for( let i=0;i<emits.length; i++){
+                    server.io.in(emits[i].wsId).emit(Eventos.ADMIN,nOrder);
+                }
+            }
+       
             return responseData(res, 200, 'Order successfull', {message:'OK',user,order:nOrder});
         } catch (error) {
             console.log(error);

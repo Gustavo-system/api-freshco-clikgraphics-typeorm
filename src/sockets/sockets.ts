@@ -28,7 +28,6 @@ export const salaRestaurant =  (cliente:Socket,io:socketIO.Server ) => {
         console.log(id);
         if(user.role ==='ADMIN' || user.role === 'COLABORADOR'){
             console.log('conectado a sala de colaborador');
-            
             cliente.join(Salas.ADMIN)
             sala= Salas.ADMIN
           }
@@ -57,12 +56,13 @@ export const salaRestaurant =  (cliente:Socket,io:socketIO.Server ) => {
 
 export const delivery = (cliente:Socket,io:socketIO.Server ) =>{
   cliente.on(Eventos.DELIVERY, async(payload) => {
-
     if(payload.to === undefined || payload.to === null){
       io.in(Salas.DELIVERY).emit(payload)
     }else{
       let user = usuariosConectados.getUser(payload.to)
-      io.in(user.wsId).emit(payload)
+      if(user){
+        io.in(user.wsId).emit(payload)
+      }
     }
 
   })
@@ -75,7 +75,9 @@ export const customer = (cliente:Socket,io:socketIO.Server ) =>{
       io.in(Salas.CUSTOMER).emit(payload)
     }else{
       let user = usuariosConectados.getUser(payload.to)
-      io.in(user.wsId).emit(payload)
+      if(user){
+        io.in(user.wsId).emit(payload)
+      }
     }
   })
   
@@ -87,8 +89,12 @@ export const admin = (cliente:Socket,io:socketIO.Server ) =>{
     if(payload.to === undefined || payload.to === null){
       io.in(Salas.ADMIN).emit(payload)
     }else{
-      let user = usuariosConectados.getUser(payload.to)
-      io.in(user.wsId).emit(payload)
+      let emits = usuariosConectados.findAdminsByBranch(payload.branch);
+      if(emits.length > 0)  {
+          for( let i=0;i<emits.length; i++){
+              io.in(emits[i].wsId).emit(Eventos.ADMIN,payload);
+          }
+      }
     }
   })
   
