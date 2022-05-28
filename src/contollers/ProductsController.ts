@@ -13,11 +13,15 @@ export class ProductsController{
             let message:string = "OK"
             let model:any = [];
             const { id_branch } = req.query;
+         
+            
             if(id_branch){
-                model = await getRepository(ProductModel).find({where:{branch:id_branch}, relations:["branch", "category", "adicionales","cupon"]});
+                model = await getRepository(ProductModel).find({where:{branch:id_branch}, relations:["branch", "category", "adicionales","cupon","tamano"]});
             }else{
-                model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales","cupon"]});
+                model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales","cupon","tamano"]});
             }
+            console.log(model);
+            
             if(model.length == 0) message = 'Empty';
             model = model.filter( m => m.active === true)
             return responseData(resp, 200, message, model);
@@ -33,7 +37,7 @@ export class ProductsController{
             const { adicionales } = req.body;
             let productosAdicionales:any[] = [];
 
-            if(adicionales.length > 0){
+            if(adicionales && adicionales.length > 0){
                 for (let i = 0; i < adicionales.length; i++) {
                     const elemento = adicionales[i];
                     const adicional = await getRepository(AdicionalesModel).findOne({where:{id_product_extra:elemento}});
@@ -41,6 +45,11 @@ export class ProductsController{
                 }
             }
          
+    
+            
+            if(req.body.maximumQuantity === null){
+                req.body.maximumQuantity =  1000
+            }
             
             const model = getRepository(ProductModel).create({
                 name: req.body.name,
@@ -48,7 +57,7 @@ export class ProductsController{
                 price: req.body.price,
                 category:await getRepository(CategoriesModel).findOne(req.body.category),
                 branch: await getRepository(BranchModel).findOne(req.body.branch),
-                maximumQuantity: req.body.maximumQuantity,
+                maximumQuantity: req.body.maximumQuantity ?? 1000,
                 recommended: (req.body.recommended == true || req.body.recommended == 1 ) ? true : false,
                 promotion: (req.body.promotion == true || req.body.promotion == 1) ? true : false,
                 popular: (req.body.popular == true || req.body.popular == 1) ? true : false,
@@ -71,7 +80,7 @@ export class ProductsController{
 
     static getID = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales"]});
+            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales","tamano","cupon"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found');
             return responseData(resp, 200, 'Datos obtenidos', model);
         } catch (error) {
@@ -83,7 +92,7 @@ export class ProductsController{
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
     
-            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales","cupon"]});
+            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales","cupon","tamano"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
             const { adicionales } = req.body;

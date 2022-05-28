@@ -22,7 +22,7 @@ export class DeliveryManController{
         try{
             const model = await getRepository(DeliveryManModel).create({
                 model: req.body.model,
-                seguro: req.body.seguro,
+                tipo_vehiculo: req.body.tipo_vehiculo,
                 phone: req.body.phone,
                 photo_seguro : req.files['photo_seguro'] ? req.files['photo_seguro'][0].filename : 'sin_imagen.png',
                 photo_licencia : req.files['photo_licencia'] ? req.files['photo_licencia'][0].filename : 'sin_imagen.png',
@@ -53,7 +53,7 @@ export class DeliveryManController{
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
             model.model = req.body.model;
-            model.seguro = req.body.seguro;
+            model.tipo_vehiculo = req.body.tipo_vehiculo;
             model.phone = req.body.phone;
             model.photo_seguro = req.files['photo_seguro'][0].filename;
             model.photo_licencia = req.files['photo_licencia'][0].filename;

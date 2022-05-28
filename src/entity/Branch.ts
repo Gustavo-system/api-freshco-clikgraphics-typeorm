@@ -19,6 +19,13 @@ export class BranchModel {
     @Column()
     address:string;
 
+    @Column({default:0.00000, type:'double'})
+    latitud:number;
+
+
+    @Column({default:0.0000, type:'double'})
+    longitud:number;
+
     @Column({nullable:true})
     shippingCost:number;
 
@@ -27,6 +34,7 @@ export class BranchModel {
 
     @Column()
     deliveryType:string;
+ 
 
     @Column()
     paymentMethod:string;

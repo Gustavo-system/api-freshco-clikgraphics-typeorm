@@ -14,14 +14,16 @@ import upload from "../configs/libs/multer/multer";
 // import multer from "../configs/libs/multer/multer";
 import { AdicionalesController } from '../contollers/AdicionalesController';
 import { CuponesController } from "../contollers/CuponesController";
+import { TamanoController } from '../contollers/TamanoController';
 
 const router = Router();
 
-router.post('/auth/login', AuthController.login);
+router.post('/auth/login' ,AuthController.login);
+router.post('/auth/renew',AuthController.renew)
 /**
  * tablas catalogo
  */
-router.get('/categories', CategoriesController.get);
+router.get('/categories',AuthController.validateAccess, CategoriesController.get);
 router.post('/categories', CategoriesController.post);
 router.get('/categories/:id', CategoriesController.getID);
 router.put('/categories/:id', CategoriesController.update);
@@ -43,7 +45,7 @@ router.get('/users/:id', UserController.getID);
 router.put('/users/:id', UserController.update);
 router.delete('/users/:id', UserController.delete);
 router.delete('/users/disabled/:id', UserController.disabled);
-router.put('/users/password', UserController.changePassword);
+router.put('/users/password/:id', UserController.changePassword);
 
 router.get('/branchs', BranchController.get);
 router.post('/branchs', upload.single('image'), BranchController.post);
@@ -74,12 +76,15 @@ router.delete('/delivery_man/:id', DeliveryManController.delete);
 
 router.get('/orders', OrderController.get);
 router.get('/orders_user', OrderController.get_order_user);
-router.get('/orders_branch', OrderController.get_order_branch);
+router.get('/orders_branch/:branch', OrderController.get_order_branch);
 router.get('/orders_delivery', OrderController.get_orden_delivery);
 
 router.post('/orders', OrderController.post);
 router.get('/orders/:id', OrderController.getID);
-router.put('/orders/:id', OrderController.update);
+router.put('/orders/:id', OrderController.update);/* 
+router.put('/orders/cancel_order_customer/:id', OrderController.cancelOrderCustomer); */
+router.put('/orders/confirm_order_efectivo/:id', OrderController.confirmOrderEfectivo);
+
 router.put('/orders/confirm/:id', OrderController.confirmOrder);
 router.delete('/orders/:id', OrderController.delete);
 
@@ -88,6 +93,11 @@ router.get('/coupons/', CuponesController.get);
 router.put('/coupons/:id', CuponesController.update);
 router.get('/coupons/:name/:idUser', CuponesController.getName);
 router.delete('/coupons/:id', CuponesController.desactive);
+
+router.post('/tamano', TamanoController.create);
+router.get('/tamano', TamanoController.getAll);
+router.put('/tamano/:id', TamanoController.update);
+router.delete('/tamano/:id', TamanoController.delete);
 
 /**
  * Ruta para realizar pagos

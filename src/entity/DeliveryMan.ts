@@ -13,7 +13,7 @@ export class DeliveryManModel {
     model:string;
 
     @Column({nullable:true})
-    seguro:string;
+    tipo_vehiculo:string;
 
     @Column({nullable:true})
     phone:string

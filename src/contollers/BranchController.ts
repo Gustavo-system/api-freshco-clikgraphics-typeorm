@@ -14,7 +14,7 @@ export class BranchController{
             if(model.length == 0) message = 'Empty';
             let result = [];
             let products = [];
-            let total = []
+            let total:any[] = []
             for(let i =0; i<model.length; i++){
                 result = []
                 products =[]
@@ -34,6 +34,7 @@ export class BranchController{
                 }
                 let branchs = model[i];
                 branchs.orders = result
+                products = products.filter( prod => prod.active )
                 branchs.products = products;
                 total.push(branchs)
             }
@@ -54,6 +55,8 @@ export class BranchController{
                 minimumCost: req.body.minimumCost,
                 deliveryType: req.body.deliveryType,
                 paymentMethod: req.body.paymentMethod,
+                latitud:req.body.latitud,
+                longitud: req.body.longitud,
                 online: true,
                 rate: req.body.rate,
                 image: req.file ? req.file.filename : "sin_imagen.png",
@@ -90,6 +93,7 @@ export class BranchController{
              }
             let branch = model;
             branch.orders = result
+            products = products.filter( prod => prod.active )
             branch.products = products
             return responseData(resp, 200, 'OK', branch);
         } catch (error) {
@@ -100,7 +104,7 @@ export class BranchController{
 
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            let model = await getRepository(BranchModel).findOne(req.params.id);
+            let model = await getRepository(BranchModel).findOne(req.params.id,{relations:["products", "categories", "orders", "adicionales"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
              model = Object.assign(model,req.body)

@@ -8,7 +8,7 @@ export const generatePymentMethod = async (token:string) => {
         card: { token }
     })
 
-    return paymentMethod;
+    return paymentMethod; 
 }
 
 export const generatePaymentIntent = async ({amount, payment_method, branch}) => {

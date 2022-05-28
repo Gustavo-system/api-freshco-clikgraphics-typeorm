@@ -12,18 +12,19 @@ export class AddressModel {
     @Column({type:"varchar", length:100})
     address:string;
 
-    @Column({nullable:true})
+    @Column({default:0.0000, type:'double'})
     latitud:string;
 
-    @Column({nullable:true})
+    @Column({default:0.0000, type:'double'})
     longitud:string
 
     @ManyToOne(type => UserModel, (user) => user.address)
-    @JoinColumn({name:'id_user'})
     id_user: UserModel;
 
     @OneToMany( () => OrdersModel, order => order.address)
     orders:OrdersModel[]
+
+
     @Column({default:true})
     active:boolean;
 }

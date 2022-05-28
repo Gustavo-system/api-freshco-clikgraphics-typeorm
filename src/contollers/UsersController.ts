@@ -48,7 +48,7 @@ export class UserController{
             const { password, branch = [] } = req.body;
             let AllBranchForThis:any[] = [];
                
-                
+      
             if(branch.length > 0){
 
                 for (let i = 0; i < branch.length; i++) {
@@ -66,7 +66,6 @@ export class UserController{
                 email: req.body.email,
                 password: hash_password,
                 role: req.body.role,
-                active: req.body.active,
                 notificationsEnabled: req.body.notificationsEnabled,
                 birthday: req.body.birthday,
                 uuid: customId,
@@ -95,7 +94,7 @@ export class UserController{
             if(!model) return responseMessage(resp, 200, false, 'Not Found')
             model.password = "";
                     let result = []
-                    console.log(model.orders);
+        
                     
                 for(let j =0; j<model.orders.length; j++){
                     let a:orderProduct[] = JSON.parse(JSON.parse(model.orders[j].products)) ?? []
@@ -126,31 +125,39 @@ export class UserController{
 
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try{
-            const model = await getRepository(UserModel).findOne(req.body.id_user);
+            const model = await getRepository(UserModel).findOne(req.body.id_user,{relations:["address", "orders", "branch"]});
             if(!model) return responseMessage(resp, 200, false, 'Not Found');
 
-            // const deleteBranchs = await getRepository()
             const { branch = []} = req.body;
             let AllBranchForThis:any[] = [];
 
-            if(branch.length > 0){
+            if(branch && branch.length > 0){
 
                 for (let i = 0; i < branch.length; i++) {
                     const id_branch = branch[i];
-                    console.log(id_branch);
                     const branchs = await getRepository(BranchModel).findOne({where:{id_branch}});
                    
                     AllBranchForThis.push(branchs);           
                 }
+                req.body.branch = AllBranchForThis 
             }
-            req.body.branch = AllBranchForThis 
+    
             let result = Object.assign(model,req.body);
-            console.log(req.body);
-            
-            const user = await getRepository(UserModel).save(result);
-            delete user.password
-            delete user.token
-            return responseMessage(resp, 200, true, 'successful update', user);
+
+            await getRepository(UserModel).save(result);
+            delete result.password
+            delete result.token
+            let orders = []
+            for(let j =0; j<model.orders.length; j++){
+                let a:orderProduct[] = JSON.parse(JSON.parse(model.orders[j].products)) ?? []
+                let prods = await this.getProductsOrders(a)
+                let orden:any = model.orders[j]
+                orden.products = prods
+               
+                orders.push(orden)
+            }
+            result.orders
+            return responseMessage(resp, 200, true, 'successful update', {user:result});
             // return responseMessage(resp, 200, true, 'ok');
         }catch(err){
             console.log(err);
@@ -162,8 +169,8 @@ export class UserController{
         try {
             const model = await getRepository(UserModel).findOne(req.params.id);
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
-
-            await getRepository(UserModel).delete(req.params.id);
+            model.active=false
+            await getRepository(UserModel).update(req.params.id,model);
             return responseMessage(resp, 201, true, 'was successfully deleted');
         } catch (error) {
             console.log(error)

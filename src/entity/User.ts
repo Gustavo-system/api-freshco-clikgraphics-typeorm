@@ -12,6 +12,7 @@ export class UserModel {
     @Column()
     names:string;
 
+
     @Column()
     phone:string;
 

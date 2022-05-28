@@ -61,7 +61,7 @@ export class OrdersModel {
     ordena_recoje:boolean
 
     @Column({type:"varchar", length:50})
-    payment_type:boolean
+    payment_type:string
 
     @Column({type:"boolean", default:false, nullable:true})
     delivery_assigned:boolean

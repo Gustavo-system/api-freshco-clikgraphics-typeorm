@@ -3,6 +3,7 @@ import { BranchModel } from './Branch';
 import { CategoriesModel } from './Categories';
 import { CuponesModel } from './Cupones';
 import { AdicionalesModel } from './ProductosAdicionales';
+import { TamanoModel } from './Tamano';
 
 @Entity({name:"Products"})
 
@@ -59,4 +60,11 @@ export class ProductModel {
     @ManyToMany(type => CuponesModel, (cupon) => cupon.products)
     @JoinTable()
     cupon:CuponesModel
+
+    @Column({default:0})
+    sold:number
+
+    @OneToMany( () => TamanoModel, t => t.id)
+    tamanos:TamanoModel[];
+
 }

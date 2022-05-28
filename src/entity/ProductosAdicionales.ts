@@ -24,6 +24,9 @@ export class AdicionalesModel {
     @ManyToOne(type => BranchModel, (branch) => branch.adicionales)
     branch: BranchModel;
 
+    @Column({default:0})
+    sold:number
+
 
     
 }

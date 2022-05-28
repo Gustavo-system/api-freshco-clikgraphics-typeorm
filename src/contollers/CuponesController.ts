@@ -17,7 +17,22 @@ export class CuponesController{
             let date = new Date() 
             let dat = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
             let cupones:CuponesModel[] = []
-            let message ="OK"
+            let message ="OK"     
+            const { id_branch } = req.query;
+            console.log(id_branch);
+            
+            if(id_branch){
+ 
+                cupones = await getRepository(CuponesModel).find({relations:["products","branch"]});
+                console.log(cupones);
+                
+                cupones = cupones.filter( c => c.branch.id_branch === Number(id_branch) ?? [])
+                
+            }else{
+                cupones = await getRepository(CuponesModel).find({relations:["products","branch"]});
+            }
+            if(cupones.length == 0) message = 'Empty';
+            cupones = cupones.filter( m => m.active === true)
             cupones =  await getRepository(CuponesModel).find({relations:["products","branch"]})
              if(cupones.length == 0) {
                 message = 'Empty';
@@ -26,6 +41,8 @@ export class CuponesController{
              cupones = cupones.filter( m => m.active === true || new Date(m.date).getTime()  > new Date(dat).getTime() )
              return responseData(res, 200, message, cupones);
         } catch (error) {
+            console.log(error);
+            
             return responseMessage(res, 500, false, 'Internal Server Error');
         }
 
@@ -34,7 +51,7 @@ export class CuponesController{
         try {
             let {date,description,name,products ,allProducts,discount,percentage,branch} = req.body
             let result = []
-            
+            if(!products) { return responseMessage(res, 400, false, 'Not products in the coupon')}
             if(products.length > 0){
                 for(let i= 0 ; i <products.length; i++ ){
                     const product = await getRepository(ProductModel).findOne({where:{id_product :products[i]}})
@@ -115,6 +132,7 @@ export class CuponesController{
             let message ="OK"
             let cupon = await getRepository(CuponesModel).findOne(req.params.id)
             cupon.products = []
+            cupon.branch=null;
             let a = await getRepository(CuponesModel).save(cupon)
            
          await getRepository(CuponesModel).delete(req.params.id)
@@ -132,7 +150,7 @@ export class CuponesController{
             let result = []
             let cupon = await getRepository(CuponesModel).findOne(req.params.id)
             if(!cupon)   return responseData(res, 404, "Not Found", cupon);
-            if(req.body.products.length > 0){
+            if(req.body.products && req.body.products.length > 0){
                 for(let i= 0 ; i <req.body.products.length; i++ ){
                     const product = await getRepository(ProductModel).findOne({where:{id_product :req.body.products[i]}})
                     if(product) 
@@ -140,11 +158,16 @@ export class CuponesController{
                 }
                 req.body.products = result
             }
+            if(req.body.branch){
+                req.body.branch = await getRepository(BranchModel).findOne(req.body.branch)
+            }
             const model = Object.assign(cupon,req.body)
 
             let coupon= await getRepository(CuponesModel).save(model)
             return responseData(res, 200, 'Updated', coupon);
         } catch (error) {
+            console.log(error);
+            
             return responseMessage(res, 500, false, 'Internal Server Error');
         }
 

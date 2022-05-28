@@ -28,9 +28,16 @@ export class OrderController{
             }
 
             if(model.length == 0) message = 'Empty';
-   
+            let result = [];
+            for(let i =0; i<model.length; i++){
+                let a:orderProduct[] = JSON.parse(JSON.parse(model[i].products))
+                let prods = await this.getProductsOrders(a)
+                let orden:any = model[i]
+                orden.products = prods
+                result.push(orden)
+            }
             model = model.filter( m => m.active === true)
-            return responseData(resp, 200, message, model);
+            return responseData(resp, 200, message, {orders:result});
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Internal Server Error');
@@ -68,16 +75,12 @@ export class OrderController{
     static get_order_branch = async (req:Request, resp:Response):Promise<Response> => {
         try {
             let message:string = "OK"
-            const { branch, date } = req.query;
+            const { branch } = req.params;
 
             // const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
-            const model = await getRepository(OrdersModel).createQueryBuilder("order")
-                                                          .leftJoinAndSelect('order.branch', 'branch')
-                                                          .leftJoinAndSelect('order.delivery', 'delivery')
-                                                          .leftJoinAndSelect('order.address', 'address')
-                                                          .where("order.branch = :branch", {branch:branch})
-                                                          .andWhere("order.date = :date", {date:date})
-                                                          .getMany()
+            let model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user","cupon"]});
+       
+            model = model.filter( (o:OrdersModel) => o.branch.id_branch === Number(branch))
                                                           let result = [];
                                                           for(let i =0; i<model.length; i++){
                                                               let a:orderProduct[] = JSON.parse(JSON.parse(model[i].products))
@@ -140,16 +143,44 @@ export class OrderController{
                 payment_type: req.body.payment_type,
                 pin: req.body.pin,
                 delivery: req.body.id_delivery,
-                branch: await getRepository(BranchModel).findOne(req.body.address),
+                branch: await getRepository(BranchModel).findOne(req.body.branch),
                 user: await getRepository(UserModel).findOne(req.body.user),
                 cupon: await getRepository(CuponesModel).findOne(req.body.cupon)
             });
+            
+            let a:orderProduct[] = JSON.parse(JSON.parse(req.body.products)) ?? []
+            let prods = await this.getProductsOrders(a)
+
+            for(let i = 0 ; i<prods.length;i++){
+                if(prods[i].isAdicional){
+                   let product = await getRepository(AdicionalesModel).findOne(prods[i].idProduct.id_product)
+                   product.sold += Number(prods[i].cantidad)
+                   await getRepository(AdicionalesModel).update(prods[i].idProduct.id_product,product)
+                }else{
+                    let product = await getRepository(ProductModel).findOne(prods[i].idProduct.id_product)
+                    product.sold += Number(prods[i].cantidad);
+                    await getRepository(ProductModel).update(prods[i].idProduct.id_product,product)
+                }
        
-         /*    let User:any = await getRepository(UserModel).findOne(req.body.user,{relations:["address", "orders", "branch"]})
-            User.wallet -= req.body.moneyUsed;
-            await getRepository(UserModel).update(User.id_user,User) */
-            const order = await getRepository(OrdersModel).save(model);   
-            return responseData(resp, 200, 'Created', {order});
+            }
+
+            let User:any = await getRepository(UserModel).findOne(req.body.user)
+            User.wallet -= req.body.moneyUsed ?? 0;
+            await getRepository(UserModel).update(User.id_user,User) 
+            let order = await getRepository(OrdersModel).save(model);   
+            let ord:any = order
+            ord.products = prods;
+
+            if(order.payment_type =="Efectivo"){
+                let emits = usuariosConectados.findAdminsByBranch(order.branch.id_branch);
+                const server = Server.instance;
+                if(emits.length > 0)  {
+                    for( let i=0;i<emits.length; i++){
+                        server.io.in(emits[i].wsId).emit(Eventos.ADMIN,ord);
+                    }
+                }
+            }
+            return responseData(resp, 200, 'Created', {order:ord});
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 500, false, 'Bad Request');
@@ -182,12 +213,10 @@ export class OrderController{
                     model.delivery = await getRepository(DeliveryManModel).findOne(req.body.delivery,{relations:["address", "orders", "branch"]})
                     delete req.body.delivery
                 }
-                if(req.body.user){
-                  let User = await getRepository(UserModel).findOne(model.user,{relations:["address", "orders", "branch"]})
+                if(req.body.accepted == true){
+                    message = 'Order in Accepted';
                 }
-                model = Object.assign(model,req.body)
-           
-                await getRepository(OrdersModel).update({branch:model.branch},model);
+       
                 if(req.body.prepared == true){
                     message = 'Order in process';
                 }
@@ -195,6 +224,7 @@ export class OrderController{
                 if(req.body.ready == true){
 
                     message = 'your order is ready';
+                    
                 }
 
                 if(req.body.on_way == true){
@@ -202,19 +232,46 @@ export class OrderController{
                 }
 
                 if(req.body.finalized == true){
+                    if(model.finalized){ return responseMessage(resp, 406, false, 'Orden ya Finalizada');}
                     message = 'order finished';
                 }
 
                 if(req.body.cancelado == true){
+                    if(model.cancelado){ return responseMessage(resp, 406, false, 'Orden ya cancelada');}
                     message = 'Order canceled';
                     let User:any = await getRepository(UserModel).findOne(model.user.id_user,{relations:["address", "orders", "branch"]})
-                    let devolucion:number = Number(((model.total/15) *0.5).toFixed(2));
+                    let devolucion:number = Math.floor(Number(((model.total/15) *0.5).toFixed(2)));
                      User.wallet = User.wallet - devolucion + model.moneyUsed;
-                     return responseData(resp, 200, message,model);
+                     await getRepository(UserModel).save(User)
+                     model.user = User
                 }
-
-
-                return responseData(resp, 200, message,model);
+  
+                model = Object.assign(model,req.body)
+           
+                await getRepository(OrdersModel).update(model.id_order,model);
+                let a:orderProduct[] = JSON.parse(JSON.parse(model.products)) ??  []
+                let prods = await this.getProductsOrders(a)
+                let orden:any = model
+                orden.products = prods
+                const server = Server.instance;
+              
+                let User = await getRepository(UserModel).findOne(model.user.id_user,{relations:["address", "orders", "branch"]});
+                let result = []
+            for(let j =0; j<User.orders.length; j++){
+                let a:orderProduct[] = JSON.parse(JSON.parse(User.orders[j].products)) ?? []
+                let prods = await this.getProductsOrders(a)
+                let orden:any = User.orders[j]
+                orden.products = prods
+               
+                result.push(orden)
+            }
+            User.orders = result;
+            orden.user = User;
+            let user = usuariosConectados.getUser(model.user.id_user)
+            if(user){
+                server.io.in(user.wsId).emit(Eventos.CUSTOMER,orden);
+            }
+                return responseData(resp, 200, message,orden);
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');
@@ -238,12 +295,21 @@ export class OrderController{
     static payOrder = async (req:Request, resp:Response) => {
         try {
             const { token } = req.body;
-
-            const order = await getRepository(OrdersModel).findOne(req.params.id,{relations:["address", "orders", "branch"]});
+            
+            const order = await getRepository(OrdersModel).findOne({where:{id_order:req.params.id},relations:["branch", "delivery","user","cupon","address"]});
             if(!order) return responseMessage(resp, 404, false, 'Order not exist');
-
-            if(order.pagado == true) return responseMessage(resp, 406, true, 'Esta orden ya fue pagada');
-       
+            if(!order.branch.online) return responseMessage(resp, 404, false, 'Branch not exist');
+            if(order.total === 0){
+                this.confirmOrder(req,resp);
+                return
+            }
+            if(order.payment_type == "Wallet" && order.total === 0 ){
+                this.confirmOrder(req,resp);
+                return
+            }
+            
+            if(order.pagado == true) return responseMessage(resp, 406, true, 'The order was already paid');
+        
             const responseMethod = await generatePymentMethod(token);
             
             const responsePaymentIntent = await generatePaymentIntent({
@@ -251,27 +317,12 @@ export class OrderController{
                 branch: "Freshco",
                 payment_method: responseMethod.id
             });
-
+         
             return responseData(resp, 200, 'Orden pagada con exito', {pago:responsePaymentIntent,id_order:req.params.id});
         } catch (error) {
             console.log(error);
             return responseMessage(resp, 400, false, 'Error al procesar pago');
         }
-
-        // Bucar una orden del producto en nuestra base de datos
-        // const customer = await stripe.customers.create({
-        //     email: req.body.stripeEmail,
-        //     source: req.body.stripeToken
-        // })
-
-        // const charge = await stripe.charges.create({
-        //     amount: '3000',
-        //     currency: 'MXN',
-        //     customer: customer.id,
-        // })
-
-        // resp.send(charge);
-
     }
 
 
@@ -279,19 +330,34 @@ export class OrderController{
     static confirmOrder = async(req:Request,res:Response) => {
         try {
             const id_order = req.params.id
-            const order = await getRepository(OrdersModel).findOne({where:{id_order},relations:["branch", "delivery","user","cupon"]});
-           
+            const order = await getRepository(OrdersModel).findOne({where:{id_order},relations:["branch", "delivery","user","cupon","address"]});
             if(!order) return responseMessage(res, 404, false, 'Order not exist');
-
-     
+           if(order.pagado) return responseMessage(res, 406, false, ' The order was already paid');
+           let user = await getRepository(UserModel).findOne(order.user.id_user)
+           if(order.payment_type === 'Efectivo'){
+               return responseData(res, 200, 'Order successfull', {message:'OK',user,order:order});
+           }
+            
             const ordenPagada = getRepository(OrdersModel).merge(order, {
                 pagado: true
             })
             const result = await getRepository(OrdersModel).save(ordenPagada);
-            const user = await getRepository(UserModel).findOne(order.user.id_user,{relations:["address", "orders", "branch"]})
-            user.wallet += (order.total/15) * 0.5;
+        
+            user.wallet += Math.floor((order.total/15) * 0.5);
             user.wallet = Number(user.wallet.toFixed(2));
             await getRepository(UserModel).update(user.id_user,user);
+             user = await getRepository(UserModel).findOne({where:{id_user:order.user.id_user} ,relations:["address", "orders", "branch"]})
+             delete user.token
+             delete user.password
+             let result2 = [];
+             for(let i =0; i<user.orders.length; i++){
+                 let a:orderProduct[] = JSON.parse(JSON.parse(user.orders[i].products))
+                 let prods = await this.getProductsOrders(a)
+                 let orden:any = user.orders[i]
+                 orden.products = prods
+                 result2.push(orden)
+             }
+             user.orders = result2
             let a:orderProduct[] = JSON.parse(JSON.parse(order.products))
             let prods = await this.getProductsOrders(a)
             let nOrder:any = result;
@@ -313,6 +379,58 @@ export class OrderController{
 
     }
 
+    static confirmOrderEfectivo = async(req:Request,res:Response) => {
+        try {
+            const id_order = req.params.id
+            const order = await getRepository(OrdersModel).findOne({where:{id_order},relations:["branch", "delivery","user","cupon","address"]});
+            if(!order) return responseMessage(res, 404, false, 'Order not exist');
+           if(order.pagado) return responseMessage(res, 406, false, ' The order was already paid');
+           let user = await getRepository(UserModel).findOne(order.user.id_user)
+                 
+            const ordenPagada = getRepository(OrdersModel).merge(order, {
+                pagado: true,
+                finalized:true
+            })
+            const result = await getRepository(OrdersModel).save(ordenPagada);
+        
+            user.wallet += Math.floor((order.total/15) * 0.5);
+            user.wallet = Number(user.wallet.toFixed(2));
+            await getRepository(UserModel).update(user.id_user,user);
+             user = await getRepository(UserModel).findOne({where:{id_user:order.user.id_user} ,relations:["address", "orders", "branch"]})
+             delete user.token
+             delete user.password
+             let result2 = [];
+             for(let i =0; i<user.orders.length; i++){
+                 let a:orderProduct[] = JSON.parse(JSON.parse(user.orders[i].products))
+                 let prods = await this.getProductsOrders(a)
+                 let orden:any = user.orders[i]
+                 orden.products = prods
+                 result2.push(orden)
+             }
+             user.orders = result2
+            let a:orderProduct[] = JSON.parse(JSON.parse(order.products))
+            let prods = await this.getProductsOrders(a)
+            let nOrder:any = result;
+            nOrder.products = prods;
+            const server = Server.instance;
+            let emits = usuariosConectados.findAdminsByBranch(order.branch.id_branch);
+            let customer = usuariosConectados.getUser(order.user.id_user);
+            if(emits.length > 0)  {
+                for( let i=0;i<emits.length; i++){
+                    server.io.in(emits[i].wsId).emit(Eventos.ADMIN,nOrder);
+                }
+            }
+            if(customer){
+                server.io.in(customer.wsId).emit(Eventos.CUSTOMER,nOrder);
+            }
+         
+            return responseData(res, 200, 'Order successfull', {message:'OK',user,order:nOrder});
+        } catch (error) {
+            console.log(error);
+            
+            return responseMessage(res, 400, false, 'Error al confirmar el pago');
+        }
+    }
 
 
    static getProductsOrders = async (Array: orderProduct[]) => {
@@ -344,6 +462,59 @@ export class OrderController{
         
        return  result
     }
+
+
+    /* static cancelOrderCustomer = async(req:Request,res:Response) => {
+
+        try {
+            const id_order = req.params.id
+            const order = await getRepository(OrdersModel).findOne({where:{id_order},relations:["branch", "delivery","user","cupon","address"]});
+            if(!order) return responseMessage(res, 404, false, 'Order not exist');
+           let user = await getRepository(UserModel).findOne(order.user.id_user)
+           let User:any = await getRepository(UserModel).findOne(order.user.id_user,{relations:["address", "orders", "branch"]})
+           let devolucion:number = Math.floor(Number(((order.total/15) *0.5).toFixed(2)));
+            User.wallet = User.wallet - devolucion + order.moneyUsed;
+            await getRepository(UserModel).save(User)
+            order.user = User
+            order.finalized = true;
+         
+            const result = await getRepository(OrdersModel).save(ordenPagada);
+            user.wallet += Math.floor((order.total/15) * 0.5);
+            user.wallet = Number(user.wallet.toFixed(2));
+            await getRepository(UserModel).update(user.id_user,user);
+             user = await getRepository(UserModel).findOne({where:{id_user:order.user.id_user} ,relations:["address", "orders", "branch"]})
+             delete user.token
+             delete user.password
+             let result2 = [];
+             for(let i =0; i<user.orders.length; i++){
+                 let a:orderProduct[] = JSON.parse(JSON.parse(user.orders[i].products))
+                 let prods = await this.getProductsOrders(a)
+                 let orden:any = user.orders[i]
+                 orden.products = prods
+                 result2.push(orden)
+             }
+             user.orders = result2
+            let a:orderProduct[] = JSON.parse(JSON.parse(order.products))
+            let prods = await this.getProductsOrders(a)
+            let nOrder:any = result;
+            nOrder.products = prods;
+            const server = Server.instance;
+            let emits = usuariosConectados.findAdminsByBranch(order.branch.id_branch);
+            if(emits.length > 0)  {
+                for( let i=0;i<emits.length; i++){
+                    server.io.in(emits[i].wsId).emit(Eventos.ADMIN,nOrder);
+                }
+            }
+         
+            return responseData(res, 200, 'Order successfull', {message:'OK',user,order:nOrder});
+        } catch (error) {
+            console.log(error);
+            
+            return responseMessage(res, 400, false, 'Error al confirmar el pago');
+        }
+
+    } */
+
 
 
    

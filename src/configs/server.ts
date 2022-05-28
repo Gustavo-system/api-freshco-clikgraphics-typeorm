@@ -5,7 +5,7 @@ import morgan = require('morgan');
 import bodyParser = require('body-parser');
 import path = require('path');
 dotenv.config();
-import { Server as socketIO } from "socket.io";
+import * as socketIO  from "socket.io";
 import * as http from 'http'
 import * as socket from '../sockets/sockets'
 import router from '../routes/router';
@@ -36,7 +36,7 @@ export default class Server{
         this.httpServer = new http.Server(this.app);
         
         //sockets
-        this.io = new socketIO(this.httpServer,{cors:{origin:true, credentials:true}});
+        this.io = new socketIO(this.httpServer,{cors:'*'});
         this.escucharSockets()
         if (Server._instance)
          throw new Error("Use Singleton.instance");
