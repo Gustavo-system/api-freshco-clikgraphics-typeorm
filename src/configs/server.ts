@@ -36,7 +36,9 @@ export default class Server{
         this.httpServer = new http.Server(this.app);
         
         //sockets
-        this.io = new socketIO(this.httpServer,{cors:'*'});
+        this.io = new socketIO(this.httpServer,{cors:{
+            origin:'*'
+        }});
         this.escucharSockets()
         if (Server._instance)
          throw new Error("Use Singleton.instance");
@@ -60,6 +62,9 @@ export default class Server{
             
            socket.desconectar(cliente,this.io )
            socket.salaRestaurant(cliente,this.io )
+           socket.delivery(cliente,this.io )
+           socket.admin(cliente,this.io )
+           socket.customer(cliente,this.io )
           
             
             

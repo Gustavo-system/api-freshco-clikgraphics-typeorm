@@ -15,10 +15,12 @@ export class CuponesModel {
     @Column()
     date:string
     @Column()
+    initialDate:string
+    @Column()
     description:string
     @Column({default:1})
     uses:number
-    @ManyToMany(type => ProductModel, (product) => product.cupon)
+    @ManyToMany(type => ProductModel, (product) => product.cupon,{ onDelete: 'CASCADE' })
     products: ProductModel[];
     @Column({default:false, nullable:true})
     allProducts:boolean
@@ -26,9 +28,9 @@ export class CuponesModel {
     discount:number
     @Column({default:false})
     percentage:boolean
-    @OneToMany( () => OrdersModel, order => order.cupon)
+    @OneToMany( () => OrdersModel, order => order.cupon,)
     orders:OrdersModel[]
-    @ManyToOne( () => BranchModel)
+    @ManyToOne( () => BranchModel,{ onDelete: 'CASCADE' })
     branch:BranchModel
     
 }

@@ -72,7 +72,7 @@ export class OrdersModel {
     @Column({type:"boolean", default:false, nullable:true})
     verified_pin:boolean
 
-    @ManyToOne(type => BranchModel, (branch) => branch.orders)
+    @ManyToOne(type => BranchModel)
     branch: BranchModel;
 
     @ManyToOne(type => DeliveryManModel, (delivery) => delivery.orders)
@@ -84,7 +84,7 @@ export class OrdersModel {
     @ManyToOne(() => AddressModel, address => address.orders)
     address: AddressModel;
 
-    @ManyToOne(() => CuponesModel, cupon => cupon.orders)
+    @ManyToOne(() => CuponesModel, cupon => cupon.orders,{ onDelete: 'CASCADE' })
     cupon: CuponesModel;
     @Column({default:true})
     active:boolean;

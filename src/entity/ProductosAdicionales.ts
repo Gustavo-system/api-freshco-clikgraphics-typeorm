@@ -21,7 +21,7 @@ export class AdicionalesModel {
     @ManyToMany(type => ProductModel, (product) => product.adicionales)
     products: ProductModel[];
 
-    @ManyToOne(type => BranchModel, (branch) => branch.adicionales)
+    @ManyToOne(type => BranchModel, (branch) => branch.adicionales,{ onDelete: 'CASCADE' })
     branch: BranchModel;
 
     @Column({default:0})

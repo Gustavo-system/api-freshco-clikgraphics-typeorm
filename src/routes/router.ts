@@ -71,6 +71,8 @@ router.delete('/products/disabled/:id', ProductsController.disabled);
 router.get('/delivery_man', DeliveryManController.get);
 router.post('/delivery_man', DeliveryMan, DeliveryManController.post);
 router.get('/delivery_man/:id', DeliveryManController.getID);
+router.get('/delivery_man/:id/active', DeliveryManController.active);
+router.get('/delivery_man/:id/desactive', DeliveryManController.desactive);
 router.put('/delivery_man/:id', DeliveryMan, DeliveryManController.update);
 router.delete('/delivery_man/:id', DeliveryManController.delete);
 

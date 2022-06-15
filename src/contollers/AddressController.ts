@@ -58,7 +58,7 @@ export class AddressController{
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
             model.address = req.body.address ??  model.address,
-            model.address = req.body.latitud ??  model.address,
+            model.latitud = req.body.latitud ??  model.latitud,
             model.longitud = req.body.longitud ?? model.longitud,
 
             await getRepository(AddressModel).save(model);

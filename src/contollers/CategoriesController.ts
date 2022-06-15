@@ -37,6 +37,8 @@ export class CategoriesController{
             });
             const categoria = await getRepository(CategoriesModel).save(model);
             // return responseMessage(resp, 201, true, 'Created');
+            delete categoria.products
+            delete categoria.id_branch
             return responseData(resp, 200, 'Created', categoria);
         } catch (error) {
             console.log(error)

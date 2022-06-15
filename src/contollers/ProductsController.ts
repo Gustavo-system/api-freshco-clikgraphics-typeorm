@@ -16,9 +16,9 @@ export class ProductsController{
          
             
             if(id_branch){
-                model = await getRepository(ProductModel).find({where:{branch:id_branch}, relations:["branch", "category", "adicionales","cupon","tamano"]});
+                model = await getRepository(ProductModel).find({where:{branch:id_branch}});
             }else{
-                model = await getRepository(ProductModel).find({relations:["branch", "category", "adicionales","cupon","tamano"]});
+                model = await getRepository(ProductModel).find();
             }
             console.log(model);
             
@@ -33,7 +33,8 @@ export class ProductsController{
 
     static post = async (req:Request, resp:Response):Promise<Response> => {
         try {
-
+            console.log(req.body);
+            
             const { adicionales } = req.body;
             let productosAdicionales:any[] = [];
 
@@ -54,10 +55,10 @@ export class ProductsController{
             const model = getRepository(ProductModel).create({
                 name: req.body.name,
                 description: req.body.description,
-                price: req.body.price,
                 category:await getRepository(CategoriesModel).findOne(req.body.category),
                 branch: await getRepository(BranchModel).findOne(req.body.branch),
                 maximumQuantity: req.body.maximumQuantity ?? 1000,
+                price:req.body.price ?? 0,
                 recommended: (req.body.recommended == true || req.body.recommended == 1 ) ? true : false,
                 promotion: (req.body.promotion == true || req.body.promotion == 1) ? true : false,
                 popular: (req.body.popular == true || req.body.popular == 1) ? true : false,
@@ -69,6 +70,8 @@ export class ProductsController{
             
             // return resp.json(model);
             const product = await getRepository(ProductModel).save(model);
+            console.log(product);
+            
             let prod:any= product
             prod['cupon']=[]
             return responseData(resp, 200, 'Created', product);
@@ -92,11 +95,12 @@ export class ProductsController{
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
     
-            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales","cupon","tamano"]});
+            const model = await getRepository(ProductModel).findOne(req.params.id, {relations:["branch", "category", "adicionales","cupon","tamanos"]});
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
             const { adicionales } = req.body;
             let productosAdicionales:any[] = [];
+
 
             if(adicionales.length > 0){
    
@@ -106,17 +110,16 @@ export class ProductsController{
                     productosAdicionales.push(adicional);
                 }
             }
-       
+          
             model.name = req.body.name;
             model.description = req.body.description;
-            model.category = await getRepository(CategoriesModel).findOne(req.body.category),
-            model.price = req.body.price;
             model.maximumQuantity = req.body.maximumQuantity;
-            model.recommended = (req.body.recommended == true || req.body.recommended == 1) ? true : false;
-            model.promotion = (req.body.promotion == true || req.body.promotion == 1) ? true : false;
-            model.popular = (req.body.popular == true || req.body.popular == 1) ? true : false;
-            model.new = (req.body.new == true || req.body.new == 1) ? true : false;
-            model.vegan = (req.body.vegan == true || req.body.vegan == 1) ? true : false;
+            model.price=req.body.price ?? 0,
+            model.recommended = (req.body.recommended == "true" ) ? true : false;
+            model.promotion = (req.body.promotion == "true" ) ? true : false;
+            model.popular = (req.body.popular == "true" ) ? true : false;
+            model.new = (req.body.new == "true" ) ? true : false;
+            model.vegan = (req.body.vegan == "true") ? true : false;
             model.adicionales = productosAdicionales
             model.image = req.file ? req.file.filename : model.image
 
@@ -145,10 +148,12 @@ export class ProductsController{
     static disabled = async (req:Request, resp:Response):Promise<Response> => {
         try {
             const model = await getRepository(ProductModel).findOne(req.params.id);
+            console.log(model);
+            
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
-            model.active=false;
+            model.active=!model.active;
             await getRepository(ProductModel).update(req.params.id,model);
-            return responseMessage(resp, 201, true, 'was successfully deleted');
+            return responseMessage(resp, 201, true, 'was successfully disabled');
         } catch (error) {
             console.log(error)
             return responseMessage(resp, 400, false, 'Bad Request');

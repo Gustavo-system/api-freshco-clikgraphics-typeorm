@@ -24,14 +24,25 @@ export class DeliveryManModel {
     @Column({nullable:true})
     photo_licencia:string
 
+
+    @Column({default:'sin_imagen.png'})
+    photo_delivery:string
+    @Column()
+    placas:string;
+    @Column()
+    color:string;
+    @Column()
+    marca:string;
+
     @OneToOne(type => UserModel, {
         eager: true,
+        onDelete:"CASCADE"
     })
     @JoinColumn({name:"id_user"})
     id_user: UserModel;
 
     @OneToMany(type => OrdersModel, (order) => order.delivery)
     orders: OrdersModel[];
-    @Column({default:true})
+    @Column({default:false})
     active:boolean;
 }

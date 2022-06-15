@@ -19,6 +19,13 @@ export class BranchModel {
     @Column()
     address:string;
 
+    @Column()
+    opening:string;
+    @Column()
+    closing:string;
+    @Column()
+    phone:string;
+
     @Column({default:0.00000, type:'double'})
     latitud:number;
 
@@ -35,7 +42,6 @@ export class BranchModel {
     @Column()
     deliveryType:string;
  
-
     @Column()
     paymentMethod:string;
 
@@ -57,13 +63,10 @@ export class BranchModel {
     @OneToMany(type => CategoriesModel, (category) => category.id_branch)
     categories: CategoriesModel[];
 
-    @OneToMany(type => OrdersModel, (order) => order.branch)
-    orders: OrdersModel[];
-
     @OneToMany(type => AdicionalesModel, (adicionales) => adicionales.branch)
     adicionales: AdicionalesModel[];
 
-    @ManyToMany(type => UserModel, (user) => user.branch)
-    user: UserModel;
+    @OneToMany(type => UserModel, (user) => user.branch)
+    user: UserModel[];
 
 }

@@ -17,7 +17,7 @@ export class CategoriesModel {
     @OneToMany(type => ProductModel, (product) => product.category)
     products: ProductModel[];
 
-    @ManyToOne(type => BranchModel, (branch) => branch.categories)
+    @ManyToOne(type => BranchModel, (branch) => branch.categories, { onDelete: 'CASCADE' })
     id_branch: BranchModel;
     
 }

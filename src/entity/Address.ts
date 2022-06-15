@@ -18,7 +18,7 @@ export class AddressModel {
     @Column({default:0.0000, type:'double'})
     longitud:string
 
-    @ManyToOne(type => UserModel, (user) => user.address)
+    @ManyToOne(type => UserModel, (user) => user.address, { onDelete: 'CASCADE' })
     id_user: UserModel;
 
     @OneToMany( () => OrdersModel, order => order.address)

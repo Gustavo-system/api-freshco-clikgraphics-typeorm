@@ -13,6 +13,7 @@ import { AdicionalesModel } from '../entity/ProductosAdicionales';
 import { ProductModel } from '../entity/Products';
 import { Eventos, Salas } from '../sockets/eventos.enum';
 import { CuponesModel } from '../entity/Cupones';
+import { DeliveryMan } from '../configs/libs/multer/ImagenesMulter';
 
 export class OrderController{
 
@@ -21,12 +22,15 @@ export class OrderController{
             let message:string = "OK"
             let model;
             if(Number(req.params.id)){
-                 model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user","cupon"]});
-                 model = model.filter( m => m.branch?.id_branch === req.params.id)
+                console.log(req.params.id);
+                
+                 model = await getRepository(OrdersModel).find({relations:["user","address"]});
+                 model = model.filter( m => m.branch?.id_branch === Number(req.params.id))
             }else{
-                 model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user","cupon"]});
+                 model = await getRepository(OrdersModel).find({relations:["branch","address"]});
             }
-
+            console.log(model[0]);
+            
             if(model.length == 0) message = 'Empty';
             let result = [];
             for(let i =0; i<model.length; i++){
@@ -76,9 +80,8 @@ export class OrderController{
         try {
             let message:string = "OK"
             const { branch } = req.params;
-
             // const model = await getRepository(OrdersModel).find({where:{branch}, relations:["branch", "delivery"]});
-            let model = await getRepository(OrdersModel).find({relations:["branch", "delivery","user","cupon"]});
+            let model = await getRepository(OrdersModel).find({where:{branch},relations:["user","branch","address"]});
        
             model = model.filter( (o:OrdersModel) => o.branch.id_branch === Number(branch))
                                                           let result = [];
@@ -204,7 +207,9 @@ export class OrderController{
 
     static update = async (req:Request, resp:Response):Promise<Response> => {
         try {
-            let model = await getRepository(OrdersModel).findOne(req.params.id,{relations:["branch", "delivery","user","cupon"]});
+            const server = Server.instance;
+            let model = await getRepository(OrdersModel).findOne(req.params.id,{relations:["branch", "delivery","user","cupon","address"]});
+        
             if(!model) return responseMessage(resp, 404, false, 'Not Found')
 
                 let message:string = "Orden";
@@ -212,9 +217,6 @@ export class OrderController{
                     model.delivery_assigned = true
                     model.delivery = await getRepository(DeliveryManModel).findOne(req.body.delivery,{relations:["address", "orders", "branch"]})
                     delete req.body.delivery
-                }
-                if(req.body.accepted == true){
-                    message = 'Order in Accepted';
                 }
        
                 if(req.body.prepared == true){
@@ -224,7 +226,7 @@ export class OrderController{
                 if(req.body.ready == true){
 
                     message = 'your order is ready';
-                    
+                  
                 }
 
                 if(req.body.on_way == true){
@@ -253,7 +255,7 @@ export class OrderController{
                 let prods = await this.getProductsOrders(a)
                 let orden:any = model
                 orden.products = prods
-                const server = Server.instance;
+                
               
                 let User = await getRepository(UserModel).findOne(model.user.id_user,{relations:["address", "orders", "branch"]});
                 let result = []
@@ -271,10 +273,15 @@ export class OrderController{
             if(user){
                 server.io.in(user.wsId).emit(Eventos.CUSTOMER,orden);
             }
+            if(req.body.accepted == true){
+                message = 'Order in Accepted';
+                server.io.emit(Eventos.DELIVERY,orden);
+            }
+    
                 return responseData(resp, 200, message,orden);
         } catch (error) {
             console.log(error)
-            return responseMessage(resp, 400, false, 'Bad Request');
+            return responseMessage(resp, 500, false, 'Bad Request');
         }
     }
 
@@ -347,7 +354,6 @@ export class OrderController{
             user.wallet = Number(user.wallet.toFixed(2));
             await getRepository(UserModel).update(user.id_user,user);
              user = await getRepository(UserModel).findOne({where:{id_user:order.user.id_user} ,relations:["address", "orders", "branch"]})
-             delete user.token
              delete user.password
              let result2 = [];
              for(let i =0; i<user.orders.length; i++){
@@ -397,7 +403,6 @@ export class OrderController{
             user.wallet = Number(user.wallet.toFixed(2));
             await getRepository(UserModel).update(user.id_user,user);
              user = await getRepository(UserModel).findOne({where:{id_user:order.user.id_user} ,relations:["address", "orders", "branch"]})
-             delete user.token
              delete user.password
              let result2 = [];
              for(let i =0; i<user.orders.length; i++){
@@ -450,7 +455,9 @@ export class OrderController{
                 let res = {
                      cantidad:Array[i].cantidad,
                      idProduct,
-                     isAdicional:Array[i].isAdicional
+                     isAdicional:Array[i].isAdicional,
+                     size:Array[i].size ?? null,
+                     hasSize:Array[i].hasSize ?? null
                  }
                  result.push(res)
                
@@ -522,7 +529,17 @@ export class OrderController{
 }
 
 export interface orderProduct{
-    idProduct:any
-    cantidad:number
-    isAdicional:boolean
+    idProduct?:any
+    cantidad?:number
+    isAdicional?:boolean
+    hasSize?:boolean
+    size? :[{
+        cantidad:number,
+        name:string
+    }]
 }
+
+
+
+
+

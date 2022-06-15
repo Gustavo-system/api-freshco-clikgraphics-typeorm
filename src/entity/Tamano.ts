@@ -7,7 +7,7 @@ export class TamanoModel {
     @PrimaryGeneratedColumn()
     id:number;
 
-    @ManyToOne(() => ProductModel, prd => prd.tamanos)
+    @ManyToOne(() => ProductModel, prd => prd.tamanos, { onDelete: 'CASCADE' })
     product:ProductModel;
 
     @Column({nullable:true})

@@ -19,25 +19,19 @@ export class CuponesController{
             let cupones:CuponesModel[] = []
             let message ="OK"     
             const { id_branch } = req.query;
-            console.log(id_branch);
-            
+           
             if(id_branch){
  
                 cupones = await getRepository(CuponesModel).find({relations:["products","branch"]});
-                console.log(cupones);
                 
-                cupones = cupones.filter( c => c.branch.id_branch === Number(id_branch) ?? [])
+              //  cupones = cupones.filter( c => c.branch.id_branch === Number(id_branch) ?? [])
                 
             }else{
                 cupones = await getRepository(CuponesModel).find({relations:["products","branch"]});
             }
-            if(cupones.length == 0) message = 'Empty';
-            cupones = cupones.filter( m => m.active === true)
-            cupones =  await getRepository(CuponesModel).find({relations:["products","branch"]})
-             if(cupones.length == 0) {
-                message = 'Empty';
-                return responseData(res, 400, message, []);
-             }
+            if(cupones.length == 0) {
+                return responseData(res, 200, message, []);
+            }
              cupones = cupones.filter( m => m.active === true || new Date(m.date).getTime()  > new Date(dat).getTime() )
              return responseData(res, 200, message, cupones);
         } catch (error) {
@@ -49,7 +43,7 @@ export class CuponesController{
     }
     static create = async (req:Request,res:Response) => {
         try {
-            let {date,description,name,products ,allProducts,discount,percentage,branch} = req.body
+            let {date,description,name,products ,allProducts,discount,percentage,branch,initialDate} = req.body
             let result = []
             if(!products) { return responseMessage(res, 400, false, 'Not products in the coupon')}
             if(products.length > 0){
@@ -66,11 +60,14 @@ export class CuponesController{
                 description,
                 name,
                 products,
+                initialDate,
                 allProducts,
                 discount,
                 percentage,
                 branch : await getRepository(BranchModel).findOne(branch)
             })
+            console.log(model);
+            
             let coupon= await getRepository(CuponesModel).save(model)
             return responseData(res, 200, 'Created', coupon);
             
@@ -133,7 +130,7 @@ export class CuponesController{
             let cupon = await getRepository(CuponesModel).findOne(req.params.id)
             cupon.products = []
             cupon.branch=null;
-            let a = await getRepository(CuponesModel).save(cupon)
+          await getRepository(CuponesModel).save(cupon)
            
          await getRepository(CuponesModel).delete(req.params.id)
         

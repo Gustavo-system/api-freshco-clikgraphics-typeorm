@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
 import { AddressModel } from './Address';
 import { BranchModel } from './Branch';
 import { OrdersModel } from './Orders';
+import { DeliveryManModel } from './DeliveryMan';
 
 @Entity({name:"User"})
 export class UserModel {
@@ -12,7 +13,6 @@ export class UserModel {
     @Column()
     names:string;
 
-
     @Column()
     phone:string;
 
@@ -21,9 +21,6 @@ export class UserModel {
 
     @Column()
     password:string
-
-    @Column({unique:false, nullable:true})
-    token:string
 
     @Column()
     role:string
@@ -43,10 +40,7 @@ export class UserModel {
     @Column({nullable:true})
     birthday:string;
 
-    @Column({nullable:true})
-    uuid:string;
-
-    @Column({default:0})
+    @Column({default:0.0,type:'double'})
     wallet:number;
       
     @OneToMany(type => AddressModel, (address) => address.id_user)
@@ -55,8 +49,11 @@ export class UserModel {
     @OneToMany(type => OrdersModel, (order) => order.user)
     orders: OrdersModel[];
 
-    @ManyToMany(type => BranchModel, (branch) => branch.user)
-    @JoinTable({name:'tr_usuario_branch'})
-    branch: BranchModel[];
+    @ManyToOne(type => BranchModel, (branch) => branch.user,{ onDelete: 'CASCADE' })
+    branch: BranchModel;
+    
+    @OneToOne(type => DeliveryManModel, dm => dm.id_user,{nullable:true,onDelete:'CASCADE'})
+    @JoinColumn()
+    delivery:DeliveryManModel;
 
 }

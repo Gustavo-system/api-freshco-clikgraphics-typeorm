@@ -14,12 +14,11 @@ export class ProductModel {
 
     @Column()
     name:string;
+    @Column({nullable:true})
+    price:number;
 
     @Column({nullable:true})
     description:string;
-
-    @Column({nullable:true})
-    price:number;
 
     @Column({nullable:true})
     maximumQuantity:number;
@@ -45,12 +44,10 @@ export class ProductModel {
     @Column({default:true})
     active:boolean;
 
-    @ManyToOne(type => BranchModel, (branch) => branch.products)
-    @JoinTable()
+    @ManyToOne(type => BranchModel, (branch) => branch.products, { onDelete: 'CASCADE' })
     branch: BranchModel;
 
-    @ManyToOne(type => CategoriesModel, (category) => category.products)
-    @JoinTable()
+    @ManyToOne(type => CategoriesModel, (category) => category.products,{ onDelete: 'CASCADE' })
     category: CategoriesModel;
 
     @ManyToMany(type => AdicionalesModel, (adicionales) => adicionales.products)
@@ -64,7 +61,10 @@ export class ProductModel {
     @Column({default:0})
     sold:number
 
-    @OneToMany( () => TamanoModel, t => t.id)
+    @Column({default:false})
+    hasSizes:boolean;
+
+    @OneToMany( () => TamanoModel, t => t.product,{nullable:true})
     tamanos:TamanoModel[];
 
 }

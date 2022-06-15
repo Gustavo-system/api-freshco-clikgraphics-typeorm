@@ -27,7 +27,6 @@ class AuthController{
 
             let user:UserModel;
             if( email ){
-                console.log('por correo')
                 user = await getRepository(UserModel).findOne({where:{email}});
             }else{
                 console.log('por usuario')
@@ -52,15 +51,11 @@ class AuthController{
                 {expiresIn:'48h'} 
             );
 
-            const saveToken =  getRepository(UserModel).merge(user, {
-                token
-            });
-            await getRepository(UserModel).save(saveToken);
 
             user.password = "";
        
            user = await getRepository(UserModel).findOne(user.id_user, {relations:["address", "orders", "branch"]})
-            return responseData(resp, 200, 'Usuario', user);
+            return responseData(resp, 200, 'Usuario', {user,token});
         } catch (err) {
             console.log(err);
             return responseMessage(resp, 401, false, 'Datos invalidos');
